@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Tracker Pro — Clipboard Final</title>
+    <title>Movie Tracker Pro — Backup Edition</title>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -146,6 +146,14 @@
         }
 
         .trash-item-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
+        
+        .settings-group {
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;
+        }
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(128,128,128,0.1); padding: 15px 20px; border-radius: 20px;
+        }
     </style>
 </head>
 <body>
@@ -166,6 +174,27 @@
         <button class="btn" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
+    <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content">
+            <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
+            
+            <div class="settings-group">
+                <div class="settings-row">
+                    <span>Темная тема</span>
+                    <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn" style="font-size: 14px;" onclick="exportData()">Экспорт в файл</button>
+                    <button class="btn" style="font-size: 14px;" onclick="document.getElementById('import-input').click()">Импорт из файла</button>
+                </div>
+                <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
+            </div>
+
+            <button class="btn" style="background:#DCDCDC; color:#121212" onclick="closeModal('settings-modal')">Закрыть</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="trash-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
@@ -177,17 +206,6 @@
                     <span style="position: relative; z-index: 2;">Очистить всё</span>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
-        <div class="modal-content">
-            <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(128,128,128,0.1); padding:18px 25px; border-radius:20px; margin-bottom:20px;">
-                <span>Темная тема</span>
-                <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
-            </div>
-            <button class="btn" style="background:#DCDCDC; color:#121212" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -213,6 +231,44 @@
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer;
 
+        // --- ЭКСПОРТ И ИМПОРТ ---
+        function exportData() {
+            const data = {
+                boardData: JSON.parse(localStorage.getItem('boardData')) || {},
+                deletedMovies: deletedMovies,
+                theme: localStorage.getItem('theme') || 'dark',
+                version: '1.0'
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `movie_tracker_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('Это полностью заменит ваши текущие списки данными из файла. Продолжить?')) {
+                        localStorage.setItem('boardData', JSON.stringify(data.boardData));
+                        localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies));
+                        localStorage.setItem('theme', data.theme);
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert('Ошибка при чтении файла бэкапа!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- DRAG AND DROP ---
         function onMouseDown(e) {
             if (e.which !== 1) return;
             const card = e.target.closest('.card');
@@ -268,6 +324,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
+        // --- КОНТЕКСТНОЕ МЕНЮ ---
         document.addEventListener('contextmenu', e => {
             const card = e.target.closest('.card');
             if (card) {
@@ -301,6 +358,7 @@
             refreshUI();
         }
 
+        // --- HOLD TO CLEAR ---
         const clearBtn = document.getElementById('clear-btn');
         const clearFill = document.getElementById('clear-fill');
         
@@ -329,6 +387,7 @@
         clearBtn.addEventListener('mouseup', stopHold);
         clearBtn.addEventListener('mouseleave', stopHold);
 
+        // --- ОБЩАЯ ЛОГИКА ---
         function toggleTheme() {
             const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
