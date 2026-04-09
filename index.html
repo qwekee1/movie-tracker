@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Tracker Pro</title>
+    <title>Movie Tracker Pro — Final Polish</title>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <style>
         :root {
-            --bg-color: #121212;
-            --col-bg: #E8E8E8;
+            --bg-color: #E8E8E8;
+            --col-bg: #FFFFFF;
             --col-text: #121212;
             --card-bg: #DCDCDC;
             --card-text: #121212;
@@ -15,7 +21,7 @@
             --header-sub: rgba(0, 0, 0, 0.4);
         }
 
-        [data-theme="dark"] {
+        html[data-theme="dark"] {
             --bg-color: #0f0f0f;
             --col-bg: #222222;
             --col-text: #ffffff;
@@ -36,6 +42,7 @@
 
         body {
             background-color: var(--bg-color); 
+            color: var(--col-text);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -45,108 +52,66 @@
             transition: background-color 0.3s ease;
         }
 
-        .search-container {
-            width: 100%;
-            max-width: 1180px;
-            margin-bottom: 30px;
-            display: flex;
-        }
-
+        .search-container { width: 100%; max-width: 1240px; margin-bottom: 30px; display: flex; }
         .search-input {
-            width: 100%;
-            background-color: var(--col-bg);
-            border: 1px solid rgba(128,128,128,0.1);
-            padding: 18px 30px;
-            border-radius: 50px;
-            color: var(--col-text);
-            font-size: 16px;
-            outline: none;
-            user-select: text;
+            width: 100%; background-color: var(--col-bg); border: none; padding: 18px 30px;
+            border-radius: 50px; color: var(--col-text); font-size: 16px; outline: none; user-select: text;
         }
 
-        .board {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-            max-width: 1180px;
-            margin-bottom: 40px;
-            justify-content: center;
-        }
-
+        .board { display: flex; gap: 20px; width: 100%; max-width: 1240px; margin-bottom: 30px; justify-content: center; }
         .column {
-            background-color: var(--col-bg);
-            flex: 1;
-            max-width: 380px;
-            height: 650px;
-            border-radius: 30px;
-            padding: 30px 15px;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.3s ease;
+            background-color: var(--col-bg); flex: 1; max-width: 400px; height: 720px;
+            border-radius: 30px; padding: 30px 15px; display: flex; flex-direction: column; transition: background-color 0.3s ease;
         }
+        .column-header { color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; text-align: center; display: flex; justify-content: center; gap: 8px; }
+        .count-badge { color: var(--header-sub); font-weight: 500; }
 
-        .column-header {
-            color: var(--col-text);
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 25px;
-            text-align: center;
-            display: flex; justify-content: center; gap: 8px;
-        }
-
-        .task-list {
-            width: 100%;
-            flex-grow: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            scrollbar-width: none;
-        }
-
+        .task-list { width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none; min-height: 50px; }
         .task-list::-webkit-scrollbar { display: none; }
 
         .card {
-            background-color: var(--card-bg);
-            color: var(--card-text);
-            padding: 16px 20px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            cursor: grab;
-            transition: opacity 0.3s, transform 0.2s;
+            background-color: var(--card-bg); color: var(--card-text); padding: 16px 20px;
+            border-radius: 50px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
+            position: relative; overflow: hidden; cursor: grab; transition: opacity 0.2s, transform 0.2s;
+        }
+        
+        /* Исправленная центровка: фиксированный левый и правый блоки по 30px */
+        .card-number { color: var(--sub-text); font-size: 13px; width: 30px; flex-shrink: 0; text-align: left; }
+        .card-spacer { width: 30px; flex-shrink: 0; } /* Пустой блок для баланса */
+
+        .card-title { 
+            flex-grow: 1; 
+            text-align: center; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding: 0 10px;
         }
 
-        .card-number { color: var(--sub-text); font-size: 13px; margin-right: 12px; width: 20px; }
-        .card-title { flex-grow: 1; text-align: center; margin-right: 20px; }
-        .card:active { background-color: rgba(128, 128, 128, 0.1); }
+        .card.dragging { opacity: 0.1 !important; transform: scale(0.98); }
 
-        .controls {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            max-width: 600px;
+        .drag-avatar {
+            position: fixed; pointer-events: none; z-index: 9999; opacity: 0.9;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); transform: none !important;
         }
+
+        .controls { display: flex; gap: 12px; width: 100%; max-width: 600px; margin-bottom: 40px; }
 
         .btn {
-            flex: 1;
-            background-color: #FFFFFF;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #121212;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+            flex: 1; background-color: #FFFFFF; border: none; padding: 14px 20px;
+            border-radius: 50px; font-size: 16px; font-weight: bold; color: #121212;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s ease;
+            text-align: center; white-space: nowrap;
         }
-
         .btn:hover { transform: translateY(-2px); }
+
+        #context-menu {
+            position: fixed; background: #222; border-radius: 18px; padding: 8px;
+            width: 200px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: none; z-index: 3000;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; }
+        .menu-item:hover { background: #333; }
 
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -158,31 +123,33 @@
             position: absolute; content: ""; height: 18px; width: 18px;
             left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
         }
-        input:checked + .slider { background-color: #fff; }
-        input:checked + .slider:before { transform: translateX(24px); background-color: #121212; }
+        input:checked + .slider { background-color: #4cd964; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        .btn-hold { background-color: #ff4d4d !important; color: white !important; position: relative; overflow: hidden; }
+        .btn-hold .fill {
+            position: absolute; left: 0; top: 0; height: 100%; width: 0%;
+            background-color: rgba(255, 255, 255, 0.3); pointer-events: none;
+            transition: width 0.1s linear;
+        }
+        .btn-hold.holding .fill { width: 100%; transition: width 0.8s linear; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.85); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            opacity: 0; visibility: hidden; transition: all 0.3s;
         }
-        .modal-overlay.is-open { opacity: 1; pointer-events: auto; }
+        .modal-overlay.is-open { opacity: 1; visibility: visible; }
         .modal-content {
-            background-color: #222; width: 450px; padding: 35px; border-radius: 30px;
-            display: flex; flex-direction: column; color: white;
+            background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px;
+            display: flex; flex-direction: column; color: var(--col-text);
         }
 
-        #context-menu {
-            position: fixed; background: #222; border-radius: 18px; padding: 8px;
-            width: 200px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: none; z-index: 3000;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; }
-        .menu-item:hover { background: #333; }
+        .trash-item-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; }
     </style>
 </head>
-<body data-theme="light">
+<body>
 
     <div class="search-container">
         <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
@@ -200,34 +167,37 @@
         <button class="btn" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal-content">
-            <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#333; padding:18px 25px; border-radius:20px; margin-bottom:20px;">
-                <span>Темная тема</span>
-                <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
-            </div>
-            <button class="btn" style="background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="trash-modal">
+    <div class="modal-overlay" id="trash-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
             <div id="trash-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('trash-modal')">Назад</button>
-                <button class="btn" style="background:#ff4d4d; color:white;" onclick="clearTrash()">Очистить всё</button>
+                <button class="btn" style="background:#DCDCDC; color:#121212" onclick="closeModal('trash-modal')">Назад</button>
+                <button class="btn btn-hold" id="clear-btn">
+                    <div class="fill" id="clear-fill"></div>
+                    <span style="position: relative; z-index: 2;">Очистить всё</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="edit-modal">
+    <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content">
+            <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(128,128,128,0.1); padding:18px 25px; border-radius:20px; margin-bottom:20px;">
+                <span>Темная тема</span>
+                <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
+            </div>
+            <button class="btn" style="background:#DCDCDC; color:#121212" onclick="closeModal('settings-modal')">Закрыть</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
-            <input type="text" id="movie-input" style="background:#333; border:none; padding:15px; border-radius:15px; color:white; margin-bottom:20px; outline:none;" placeholder="Название...">
+            <input type="text" id="movie-input" style="background:rgba(128,128,128,0.1); border:none; padding:15px; border-radius:15px; color:inherit; margin-bottom:20px; outline:none;" placeholder="Название...">
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('edit-modal')">Отмена</button>
+                <button class="btn" style="background:#DCDCDC; color:#121212" onclick="closeModal('edit-modal')">Отмена</button>
                 <button class="btn" onclick="saveMovie()">Сохранить</button>
             </div>
         </div>
@@ -239,50 +209,168 @@
     </div>
 
     <script>
-        let currentItem = null, avatar = null, shiftX, shiftY, contextTarget = null;
+        let dragItem = null, avatar = null, shiftX, shiftY, contextTarget = null;
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
+        let holdTimer;
 
-        function openModal(id) { 
-            if(id === 'trash-modal') renderTrash();
-            document.getElementById(id).classList.add('is-open'); 
+        // --- DRAG AND DROP ---
+        function onMouseDown(e) {
+            if (e.which !== 1) return;
+            const card = e.target.closest('.card');
+            if (!card) return;
+            dragItem = card;
+            const rect = dragItem.getBoundingClientRect();
+            shiftX = e.clientX - rect.left;
+            shiftY = e.clientY - rect.top;
+            avatar = dragItem.cloneNode(true);
+            avatar.classList.add('drag-avatar');
+            avatar.style.width = dragItem.offsetWidth + 'px';
+            document.body.appendChild(avatar);
+            dragItem.classList.add('dragging');
+            updateAvatarPos(e.clientX, e.clientY);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         }
-        function closeModal(id) { document.getElementById(id).classList.remove('is-open'); }
 
+        function updateAvatarPos(x, y) {
+            avatar.style.left = (x - shiftX) + 'px';
+            avatar.style.top = (y - shiftY) + 'px';
+        }
+
+        function onMouseMove(e) {
+            updateAvatarPos(e.clientX, e.clientY);
+            avatar.style.display = 'none';
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            avatar.style.display = 'flex';
+            if (!el) return;
+            const list = el.closest('.task-list');
+            if (list) {
+                const after = getDragAfterElement(list, e.clientY);
+                after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
+                refreshUI();
+            }
+        }
+
+        function onMouseUp() {
+            if (avatar) avatar.remove();
+            if (dragItem) dragItem.classList.remove('dragging');
+            avatar = null; dragItem = null;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            refreshUI();
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggables = [...container.querySelectorAll('.card:not(.dragging)')];
+            return draggables.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // --- КОНТЕКСТНОЕ МЕНЮ ---
+        document.addEventListener('contextmenu', e => {
+            const card = e.target.closest('.card');
+            if (card) {
+                e.preventDefault();
+                contextTarget = card;
+                const menu = document.getElementById('context-menu');
+                menu.style.display = 'block';
+                menu.style.left = e.pageX + 'px';
+                menu.style.top = e.pageY + 'px';
+            }
+        });
+
+        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+
+        function editCurrent() {
+            document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent;
+            document.getElementById('modal-title').textContent = "Редактировать";
+            openModal('edit-modal');
+        }
+
+        function deleteCurrent() {
+            deletedMovies.push(contextTarget.querySelector('.card-title').textContent);
+            contextTarget.remove();
+            refreshUI();
+        }
+
+        // --- HOLD TO CLEAR (STABLE VERSION) ---
+        const clearBtn = document.getElementById('clear-btn');
+        const clearFill = document.getElementById('clear-fill');
+        
+        const startHold = () => {
+            clearBtn.classList.add('holding');
+            holdTimer = setTimeout(clearTrash, 800);
+        };
+
+        const stopHold = () => { 
+            clearBtn.classList.remove('holding'); 
+            clearTimeout(holdTimer); 
+        };
+
+        function clearTrash() {
+            // Мгновенно убираем анимацию
+            clearFill.style.transition = 'none';
+            clearBtn.classList.remove('holding');
+            
+            deletedMovies = [];
+            refreshUI();
+            closeModal('trash-modal');
+
+            // ОЧЕНЬ ВАЖНО: Удаляем инлайновый стиль transition, чтобы он снова брался из CSS
+            setTimeout(() => {
+                clearFill.style.removeProperty('transition');
+            }, 100);
+        }
+
+        clearBtn.addEventListener('mousedown', startHold);
+        clearBtn.addEventListener('mouseup', stopHold);
+        clearBtn.addEventListener('mouseleave', stopHold);
+
+        // --- ЛОГИКА ТЕМЫ ---
         function toggleTheme() {
-            const isDark = document.getElementById('theme-checkbox').checked;
-            const theme = isDark ? 'dark' : 'light';
-            document.body.setAttribute('data-theme', theme);
+            const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         }
 
-        function saveMovie() {
-            const val = document.getElementById('movie-input').value.trim();
-            if (!val) return;
-            if (contextTarget) {
-                contextTarget.querySelector('.card-title').textContent = val;
-                contextTarget = null;
-            } else {
-                document.getElementById('zone-sorting').querySelector('.task-list').prepend(createCard(val));
-            }
-            document.getElementById('movie-input').value = '';
-            closeModal('edit-modal'); refreshUI();
+        function openModal(id) {
+            if (id === 'trash-modal') renderTrash();
+            if (id === 'edit-modal' && !contextTarget) document.getElementById('modal-title').textContent = "Добавить фильм";
+            document.getElementById(id).classList.add('is-open');
         }
 
-        function createCard(title) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>`;
-            card.addEventListener('mousedown', onMouseDown);
-            return card;
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('is-open'); 
+            if (id === 'edit-modal') { contextTarget = null; document.getElementById('movie-input').value = ''; }
+        }
+
+        function closeOnOverlay(e) { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); }
+
+        function saveMovie() {
+            const val = document.getElementById('movie-input').value.trim();
+            if (val) {
+                if (contextTarget) {
+                    contextTarget.querySelector('.card-title').textContent = val;
+                    contextTarget.title = val;
+                } else {
+                    document.getElementById('zone-sorting').querySelector('.task-list').prepend(createCard(val));
+                }
+                closeModal('edit-modal');
+                refreshUI();
+            }
         }
 
         function renderTrash() {
             const container = document.getElementById('trash-content');
-            container.innerHTML = deletedMovies.length ? '' : '<p style="text-align:center; color:#666;">Пусто</p>';
+            container.innerHTML = deletedMovies.length ? '' : '<p style="text-align:center; opacity:0.5;">Корзина пуста</p>';
             deletedMovies.forEach((m, i) => {
                 const div = document.createElement('div');
-                div.style = "background:#444; padding:10px 20px; border-radius:50px; margin-bottom:8px; display:flex; justify-content:space-between;";
-                div.innerHTML = `<span>${m}</span><span style="cursor:pointer; color:#fff" onclick="restore(${i})">↩</span>`;
+                div.style = "background:rgba(128,128,128,0.1); padding:10px 20px; border-radius:50px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;";
+                div.title = m;
+                div.innerHTML = `<span class="trash-item-text">${m}</span><span style="cursor:pointer; font-size:18px; flex-shrink:0;" onclick="restore(${i})">↩</span>`;
                 container.appendChild(div);
             });
         }
@@ -293,15 +381,22 @@
             renderTrash(); refreshUI();
         }
 
-        function clearTrash() { deletedMovies = []; renderTrash(); refreshUI(); }
+        function createCard(title) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.title = title;
+            card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span><div class="card-spacer"></div>`;
+            card.addEventListener('mousedown', onMouseDown);
+            return card;
+        }
 
         function refreshUI() {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
-                const cards = col.querySelectorAll('.card');
+                const cards = col.querySelectorAll('.card:not(.dragging)');
                 col.querySelector('.count-badge').textContent = cards.length;
                 cards.forEach((c, i) => c.querySelector('.card-number').textContent = i + 1);
-                data[col.id] = Array.from(col.querySelectorAll('.card-title')).map(t => t.textContent);
+                data[col.id] = Array.from(cards).map(t => t.querySelector('.card-title').textContent);
             });
             localStorage.setItem('boardData', JSON.stringify(data));
             localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
@@ -310,58 +405,19 @@
         function handleSearch() {
             const q = document.getElementById('global-search').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
-                c.style.opacity = c.textContent.toLowerCase().includes(q) ? "1" : "0.1";
+                c.style.display = c.textContent.toLowerCase().includes(q) ? "flex" : "none";
             });
         }
 
-        // Drag & Drop (Упрощенный для стабильности)
-        function onMouseDown(e) {
-            if (e.which !== 1) return;
-            currentItem = e.target.closest('.card');
-            currentItem.style.opacity = '0.5';
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        }
-        function onMouseMove(e) {
-            const zone = e.target.closest('.column');
-            if (zone) {
-                zone.querySelector('.task-list').appendChild(currentItem);
-                refreshUI();
-            }
-        }
-        function onMouseUp() {
-            currentItem.style.opacity = '1';
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        }
-
-        document.addEventListener('contextmenu', e => {
-            const card = e.target.closest('.card');
-            if (card) {
-                e.preventDefault(); contextTarget = card;
-                const menu = document.getElementById('context-menu');
-                menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
-            }
-        });
-        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
-
-        function editCurrent() { 
-            document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent;
-            openModal('edit-modal'); 
-        }
-        function deleteCurrent() { 
-            deletedMovies.push(contextTarget.querySelector('.card-title').textContent);
-            contextTarget.remove(); refreshUI(); 
-        }
-
         window.onload = () => {
-            const theme = localStorage.getItem('theme') || 'light';
-            document.body.setAttribute('data-theme', theme);
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('theme-checkbox').checked = (theme === 'dark');
             const saved = JSON.parse(localStorage.getItem('boardData'));
             if (saved) {
                 Object.keys(saved).forEach(z => {
-                    saved[z].forEach(t => document.getElementById(z).querySelector('.task-list').appendChild(createCard(t)));
+                    const list = document.getElementById(z).querySelector('.task-list');
+                    saved[z].forEach(t => list.appendChild(createCard(t)));
                 });
             }
             refreshUI();
