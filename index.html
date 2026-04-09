@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Tracker Pro — Final Polish</title>
+    <title>Movie Tracker Pro — Clipboard Final</title>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -72,12 +72,11 @@
         .card {
             background-color: var(--card-bg); color: var(--card-text); padding: 16px 20px;
             border-radius: 50px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
-            position: relative; overflow: hidden; cursor: grab; transition: opacity 0.2s, transform 0.2s;
+            position: relative; overflow: hidden; cursor: grab; transition: opacity 0.3s, transform 0.2s;
         }
         
-        /* Исправленная центровка: фиксированный левый и правый блоки по 30px */
         .card-number { color: var(--sub-text); font-size: 13px; width: 30px; flex-shrink: 0; text-align: left; }
-        .card-spacer { width: 30px; flex-shrink: 0; } /* Пустой блок для баланса */
+        .card-spacer { width: 30px; flex-shrink: 0; }
 
         .card-title { 
             flex-grow: 1; 
@@ -205,6 +204,7 @@
 
     <div id="context-menu">
         <div class="menu-item" onclick="editCurrent()">Редактировать</div>
+        <div class="menu-item" onclick="copyCurrent()">Копировать</div>
         <div class="menu-item" style="color:#ff4d4d" onclick="deleteCurrent()">В корзину</div>
     </div>
 
@@ -213,7 +213,6 @@
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer;
 
-        // --- DRAG AND DROP ---
         function onMouseDown(e) {
             if (e.which !== 1) return;
             const card = e.target.closest('.card');
@@ -269,7 +268,6 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        // --- КОНТЕКСТНОЕ МЕНЮ ---
         document.addEventListener('contextmenu', e => {
             const card = e.target.closest('.card');
             if (card) {
@@ -290,13 +288,19 @@
             openModal('edit-modal');
         }
 
+        function copyCurrent() {
+            if (contextTarget) {
+                const title = contextTarget.querySelector('.card-title').textContent;
+                navigator.clipboard.writeText(title).catch(err => console.error(err));
+            }
+        }
+
         function deleteCurrent() {
             deletedMovies.push(contextTarget.querySelector('.card-title').textContent);
             contextTarget.remove();
             refreshUI();
         }
 
-        // --- HOLD TO CLEAR (STABLE VERSION) ---
         const clearBtn = document.getElementById('clear-btn');
         const clearFill = document.getElementById('clear-fill');
         
@@ -311,15 +315,11 @@
         };
 
         function clearTrash() {
-            // Мгновенно убираем анимацию
             clearFill.style.transition = 'none';
             clearBtn.classList.remove('holding');
-            
             deletedMovies = [];
             refreshUI();
             closeModal('trash-modal');
-
-            // ОЧЕНЬ ВАЖНО: Удаляем инлайновый стиль transition, чтобы он снова брался из CSS
             setTimeout(() => {
                 clearFill.style.removeProperty('transition');
             }, 100);
@@ -329,7 +329,6 @@
         clearBtn.addEventListener('mouseup', stopHold);
         clearBtn.addEventListener('mouseleave', stopHold);
 
-        // --- ЛОГИКА ТЕМЫ ---
         function toggleTheme() {
             const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light';
             document.documentElement.setAttribute('data-theme', theme);
@@ -400,12 +399,17 @@
             });
             localStorage.setItem('boardData', JSON.stringify(data));
             localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
+            handleSearch();
         }
 
         function handleSearch() {
             const q = document.getElementById('global-search').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
-                c.style.display = c.textContent.toLowerCase().includes(q) ? "flex" : "none";
+                if (!q) {
+                    c.style.opacity = "1";
+                } else {
+                    c.style.opacity = c.textContent.toLowerCase().includes(q) ? "1" : "0.1";
+                }
             });
         }
 
