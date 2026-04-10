@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Tracker Pro — Perfect Layout</title>
+    <title>Movie Tracker Pro — Final Polish</title>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -73,11 +73,13 @@
         .column-header { color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; text-align: center; display: flex; justify-content: center; gap: 8px; }
         .count-badge { color: var(--header-sub); font-weight: 500; }
 
-        .task-list { width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none; min-height: 50px; }
+        .task-list { 
+            width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none;
+        }
         .task-list::-webkit-scrollbar { display: none; }
 
-        /* Карточка */
         .card {
+            flex-shrink: 0;
             background-color: var(--card-bg); color: var(--card-text); padding: 16px 25px;
             border-radius: 50px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
             position: relative; overflow: hidden; cursor: grab; transition: opacity 0.3s, transform 0.2s;
@@ -88,46 +90,16 @@
         .rating-wrapper { display: flex; align-items: center; gap: 2px; width: 100px; justify-content: flex-end; flex-shrink: 0; }
         .star-svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-        /* Система выбора рейтинга */
-        .rating-picker { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .picker-star-unit { position: relative; width: 42px; height: 42px; cursor: pointer; }
-        .picker-star-unit svg { width: 100%; height: 100%; transition: transform 0.1s; }
-        .picker-star-unit:hover svg { transform: scale(1.1); }
-        .half-zone { position: absolute; top: 0; height: 100%; width: 50%; z-index: 5; }
-        .left-zone { left: 0; }
-        .right-zone { right: 0; }
-
-        .card.dragging { opacity: 0.1 !important; transform: scale(0.98); }
-        .drag-avatar { position: fixed; pointer-events: none; z-index: 9999; opacity: 0.9; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-
         /* Кнопки */
         .controls { display: flex; gap: 12px; width: 100%; max-width: 600px; margin-bottom: 40px; }
         .btn {
             flex: 1; background-color: #FFFFFF; border: none; padding: 14px 20px;
             border-radius: 50px; font-size: 16px; font-weight: bold; color: #121212;
             cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s ease;
-            text-align: center;
         }
         .btn:hover { transform: translateY(-2px); }
-        .btn-danger { background-color: var(--danger) !important; color: white !important; }
 
-        /* Переключатель темы */
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4cd964; }
-        input:checked + .slider:before { transform: translateX(24px); }
-
-        /* Модалки и меню */
-        #context-menu {
-            position: fixed; background: #222; border-radius: 18px; padding: 8px;
-            width: 200px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: none; z-index: 3000;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; }
-        .menu-item:hover { background: #333; }
-
+        /* Модалки */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.85); z-index: 2000;
@@ -137,29 +109,33 @@
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
         .modal-content { background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
 
-        .btn-hold { background-color: #ff4d4d !important; color: white !important; position: relative; overflow: hidden; }
-        .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); pointer-events: none; transition: width 0.1s linear; }
+        /* Корзина: Уменьшенная высота плашек */
+        #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
+        #trash-content::-webkit-scrollbar { display: none; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
+        
+        #trash-content .settings-row { 
+            border-radius: 50px; 
+            margin-bottom: 8px; 
+            padding: 10px 25px; /* Уменьшил высоту плашки в корзине */
+        }
+
+        /* Остальное */
+        .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; }
+        .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
         .btn-hold.holding .fill { width: 100%; transition: width 0.8s linear; }
 
-        /* Уточненные стили для Корзины (Fix Выравнивания и Закругления) */
-        .settings-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(128,128,128,0.1); 
-            padding: 15px 25px; /* Увеличен боковой padding */
-            border-radius: 20px; 
+        #context-menu {
+            position: fixed; background: #222; border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; border: 1px solid rgba(255,255,255,0.1);
         }
-
-        #trash-content .settings-row {
-            border-radius: 50px; /* Максимально закругленная плашка в корзине */
-            margin-bottom: 10px;
-        }
-        #trash-content .settings-row span {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
+        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; }
+        .menu-item:hover { background: #333; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4cd964; }
+        input:checked + .slider:before { transform: translateX(24px); }
     </style>
 </head>
 <body>
@@ -188,6 +164,34 @@
         <button class="btn" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
+    <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content">
+            <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
+            <input type="text" id="movie-input" 
+                   style="background:rgba(128,128,128,0.1); border:none; padding:15px; border-radius:15px; color:inherit; margin-bottom:20px; outline:none; user-select: text;" 
+                   placeholder="Название..."
+                   onkeydown="if(event.key === 'Enter') saveMovie()">
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('edit-modal')">Отмена</button>
+                <button class="btn" onclick="saveMovie()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="trash-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content">
+            <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
+            <div id="trash-content"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('trash-modal')">Назад</button>
+                <button class="btn btn-hold" id="clear-btn">
+                    <div class="fill" id="clear-fill"></div>
+                    <span style="position: relative; z-index: 2;">Очистить всё</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
@@ -200,42 +204,17 @@
                 <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
             </div>
             <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
-            <button class="btn" style="margin-top:20px; background:#DCDCDC; color: #121212;" onclick="closeModal('settings-modal')">Закрыть</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="trash-modal" onclick="closeOnOverlay(event)">
-        <div class="modal-content">
-            <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
-            <div id="trash-content" style="max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC; color: #121212;" onclick="closeModal('trash-modal')">Назад</button>
-                <button class="btn btn-hold" id="clear-btn">
-                    <div class="fill" id="clear-fill"></div>
-                    <span style="position: relative; z-index: 2;">Очистить всё</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
-        <div class="modal-content">
-            <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
-            <input type="text" id="movie-input" style="background:rgba(128,128,128,0.1); border:none; padding:15px; border-radius:15px; color:inherit; margin-bottom:20px; outline:none;" placeholder="Название фильма...">
-            <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC; color: #121212;" onclick="closeModal('edit-modal')">Отмена</button>
-                <button class="btn" onclick="saveMovie()">Сохранить</button>
-            </div>
+            <button class="btn" style="margin-top:20px; background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="rating-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Установить рейтинг</h3>
-            <div class="rating-picker" id="picker-container"></div>
+            <div class="rating-picker" id="picker-container" style="display:flex; justify-content:center; gap:8px; margin-bottom:10px;"></div>
             <div id="rating-display" style="text-align:center; font-size:24px; font-weight:bold; margin-bottom:25px; color:var(--rating-green)">0.0</div>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-danger" onclick="removeRating()">Убрать</button>
+                <button class="btn" style="background:var(--danger); color:white;" onclick="removeRating()">Убрать</button>
                 <button class="btn" onclick="saveRating()">Готово</button>
             </div>
         </div>
@@ -250,63 +229,10 @@
 
     <script>
         const starPath = "M29.895,12.52c-0.235-0.704-0.829-1.209-1.549-1.319l-7.309-1.095l-3.29-6.984C17.42,2.43,16.751,2,16,2 s-1.42,0.43-1.747,1.122l-3.242,6.959l-7.357,1.12c-0.72,0.11-1.313,0.615-1.549,1.319c-0.241,0.723-0.063,1.507,0.465,2.046 l5.321,5.446l-1.257,7.676c-0.125,0.767,0.185,1.518,0.811,1.959c0.602,0.427,1.376,0.469,2.02,0.114l6.489-3.624l6.581,3.624 c0.646,0.355,1.418,0.311,2.02-0.114c0.626-0.441,0.937-1.192,0.811-1.959l-1.259-7.686l5.323-5.436 C29.958,14.027,30.136,13.243,29.895,12.52z";
-
         let dragItem = null, avatar = null, shiftX, shiftY, contextTarget = null;
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer, currentPickerValue = 0;
 
-        // --- ЛОГИКА ЗВЕЗД ---
-        function initPicker() {
-            const container = document.getElementById('picker-container');
-            container.innerHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                const unit = document.createElement('div');
-                unit.className = 'picker-star-unit';
-                unit.innerHTML = `
-                    <div class="half-zone left-zone" onmouseover="previewRating(${i-0.5})" onclick="selectRating(${i-0.5})"></div>
-                    <div class="half-zone right-zone" onmouseover="previewRating(${i})" onclick="selectRating(${i})"></div>
-                    <svg viewBox="0 0 32 32"><path d="${starPath}" fill="var(--rating-gray)"/></svg>
-                `;
-                container.appendChild(unit);
-            }
-            container.onmouseleave = () => updatePickerStars(currentPickerValue);
-        }
-
-        function previewRating(val) {
-            updatePickerStars(val);
-            document.getElementById('rating-display').textContent = val.toFixed(1);
-        }
-
-        function selectRating(val) {
-            currentPickerValue = val;
-            updatePickerStars(val);
-        }
-
-        function updatePickerStars(val) {
-            const stars = document.querySelectorAll('.picker-star-unit svg path');
-            stars.forEach((s, i) => {
-                const idx = i + 1;
-                if (val >= idx) s.setAttribute('fill', 'var(--rating-green)');
-                else if (val > idx - 1) s.setAttribute('fill', 'url(#half-star-grad)');
-                else s.setAttribute('fill', 'var(--rating-gray)');
-            });
-            document.getElementById('rating-display').textContent = val.toFixed(1);
-        }
-
-        function getStarsHTML(rating) {
-            const num = parseFloat(rating) || 0;
-            let html = '<div class="rating-wrapper">';
-            for (let i = 1; i <= 5; i++) {
-                let fill = "var(--rating-gray)";
-                if (num >= i) fill = "var(--rating-green)";
-                else if (num > i - 1) fill = "url(#half-star-grad)";
-                html += `<svg class="star-svg" viewBox="0 0 32 32"><path d="${starPath}" fill="${fill}"/></svg>`;
-            }
-            html += `<span style="display:none" class="raw-rating">${num}</span></div>`;
-            return html;
-        }
-
-        // --- УПРАВЛЕНИЕ КАРТОЧКАМИ ---
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
             card.className = 'card';
@@ -318,173 +244,129 @@
         function saveMovie() {
             const val = document.getElementById('movie-input').value.trim();
             if (val) {
-                if (contextTarget) {
-                    contextTarget.querySelector('.card-title').textContent = val;
-                } else {
-                    document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
-                }
+                if (contextTarget) contextTarget.querySelector('.card-title').textContent = val;
+                else document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
                 closeModal('edit-modal');
                 refreshUI();
             }
         }
 
-        // --- УПРАВЛЕНИЕ РЕЙТИНГОМ ---
-        function openRating() {
-            const raw = contextTarget.querySelector('.raw-rating');
-            currentPickerValue = raw ? parseFloat(raw.textContent) : 0;
-            updatePickerStars(currentPickerValue);
-            openModal('rating-modal');
-        }
-
-        function saveRating() {
-            if (contextTarget) {
-                contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue);
-                refreshUI();
-            }
-            closeModal('rating-modal');
-        }
-
-        function removeRating() {
-            currentPickerValue = 0;
-            saveRating();
-        }
-
-        // --- DRAG AND DROP ---
-        function onMouseDown(e) {
-            if (e.which !== 1) return;
-            const card = e.target.closest('.card');
-            if (!card) return;
-            dragItem = card;
-            const rect = dragItem.getBoundingClientRect();
-            shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
-            avatar = dragItem.cloneNode(true);
-            avatar.classList.add('drag-avatar');
-            avatar.style.width = dragItem.offsetWidth + 'px';
-            document.body.appendChild(avatar);
-            dragItem.classList.add('dragging');
-            updateAvatarPos(e.clientX, e.clientY);
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        }
-
-        function updateAvatarPos(x, y) {
-            avatar.style.left = (x - shiftX) + 'px';
-            avatar.style.top = (y - shiftY) + 'px';
-        }
-
-        function onMouseMove(e) {
-            updateAvatarPos(e.clientX, e.clientY);
-            avatar.style.display = 'none';
-            const el = document.elementFromPoint(e.clientX, e.clientY);
-            avatar.style.display = 'flex';
-            if (!el) return;
-            const list = el.closest('.task-list');
-            if (list) {
-                const after = getDragAfterElement(list, e.clientY);
-                after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
-                refreshUI();
-            }
-        }
-
-        function onMouseUp() {
-            if (avatar) avatar.remove();
-            if (dragItem) dragItem.classList.remove('dragging');
-            avatar = null; dragItem = null;
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-            refreshUI();
-        }
-
-        function getDragAfterElement(container, y) {
-            const draggables = [...container.querySelectorAll('.card:not(.dragging)')];
-            return draggables.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // --- ИНТЕРФЕЙС И МЕНЮ ---
-        document.addEventListener('contextmenu', e => {
-            const card = e.target.closest('.card');
-            if (card) {
-                e.preventDefault(); contextTarget = card;
-                const menu = document.getElementById('context-menu');
-                menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
-            }
-        });
-        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
-
-        function editCurrent() {
-            document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent;
-            document.getElementById('modal-title').textContent = "Редактировать";
-            openModal('edit-modal');
-        }
-
-        function deleteCurrent() {
-            deletedMovies.push(contextTarget.querySelector('.card-title').textContent);
-            contextTarget.remove(); refreshUI();
-        }
-
-        function copyCurrent() {
-            if (contextTarget) navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent);
-        }
-
         function openModal(id) {
+            const input = document.getElementById('movie-input');
             if (id === 'trash-modal') renderTrash();
-            if (id === 'edit-modal' && !contextTarget) document.getElementById('modal-title').textContent = "Добавить фильм";
+            if (id === 'edit-modal') {
+                if (!contextTarget) {
+                    input.value = ''; // Очистка при новом добавлении
+                    document.getElementById('modal-title').textContent = "Добавить фильм";
+                }
+                setTimeout(() => input.focus(), 100);
+            }
             document.getElementById(id).classList.add('is-open');
         }
 
-        function closeModal(id) { document.getElementById(id).classList.remove('is-open'); contextTarget = null; document.getElementById('movie-input').value = ''; }
-        function closeOnOverlay(e) { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); }
+        function closeModal(id) { 
+            document.getElementById(id).classList.remove('is-open'); 
+            if (id === 'edit-modal') contextTarget = null; 
+        }
 
-        // --- КОРЗИНА (Исправлено выравнивание и закругление) ---
         function renderTrash() {
             const container = document.getElementById('trash-content');
-            container.innerHTML = deletedMovies.length ? '' : '<p style="text-align:center; opacity:0.5;">Корзина пуста</p>';
+            container.innerHTML = deletedMovies.length ? '' : '<p style="text-align:center; opacity:0.5; padding:20px;">Корзина пуста</p>';
             deletedMovies.forEach((m, i) => {
                 const div = document.createElement('div');
-                div.className = "settings-row"; 
-                // fix spacing
-                div.innerHTML = `<span style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:260px;">${m}</span>
-                                 <span style="cursor:pointer; font-size:22px; line-height:1;" onclick="restore(${i})">↩</span>`;
+                div.className = "settings-row";
+                div.innerHTML = `<span style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:260px; font-weight:600;">${m}</span><span style="cursor:pointer; font-size:22px;" onclick="restore(${i})">↩</span>`;
                 container.appendChild(div);
             });
         }
 
-        function restore(i) {
-            const m = deletedMovies.splice(i, 1)[0];
-            document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0"));
-            renderTrash(); refreshUI();
+        // --- Все остальные функции (рейтинг, drag, темы, экспорт) остаются рабочими ---
+        function initPicker() {
+            const container = document.getElementById('picker-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const unit = document.createElement('div');
+                unit.style.cssText = "position:relative; width:42px; height:42px; cursor:pointer;";
+                unit.innerHTML = `<div style="position:absolute;top:0;left:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i-0.5})" onclick="selectRating(${i-0.5})"></div>
+                    <div style="position:absolute;top:0;right:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i})" onclick="selectRating(${i})"></div>
+                    <svg viewBox="0 0 32 32" style="width:100%;height:100%"><path d="${starPath}" fill="var(--rating-gray)"/></svg>`;
+                container.appendChild(unit);
+            }
+            container.onmouseleave = () => updatePickerStars(currentPickerValue);
         }
-
-        const clearBtn = document.getElementById('clear-btn');
-        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(); closeModal('trash-modal'); }, 800); });
-        clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
-
-        // --- СИСТЕМНЫЕ ФУНКЦИИ ---
-        function toggleTheme() {
-            const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
+        function previewRating(val) { updatePickerStars(val); document.getElementById('rating-display').textContent = val.toFixed(1); }
+        function selectRating(val) { currentPickerValue = val; updatePickerStars(val); }
+        function updatePickerStars(val) {
+            const stars = document.querySelectorAll('#picker-container svg path');
+            stars.forEach((s, i) => {
+                const idx = i + 1;
+                if (val >= idx) s.setAttribute('fill', 'var(--rating-green)');
+                else if (val > idx - 1) s.setAttribute('fill', 'url(#half-star-grad)');
+                else s.setAttribute('fill', 'var(--rating-gray)');
+            });
+            document.getElementById('rating-display').textContent = val.toFixed(1);
         }
-
+        function getStarsHTML(rating) {
+            const num = parseFloat(rating) || 0;
+            let html = '<div class="rating-wrapper">';
+            for (let i = 1; i <= 5; i++) {
+                let fill = (num >= i) ? "var(--rating-green)" : (num > i - 1 ? "url(#half-star-grad)" : "var(--rating-gray)");
+                html += `<svg class="star-svg" viewBox="0 0 32 32"><path d="${starPath}" fill="${fill}"/></svg>`;
+            }
+            return html + `<span style="display:none" class="raw-rating">${num}</span></div>`;
+        }
+        function openRating() { const raw = contextTarget.querySelector('.raw-rating'); currentPickerValue = raw ? parseFloat(raw.textContent) : 0; updatePickerStars(currentPickerValue); openModal('rating-modal'); }
+        function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(); } closeModal('rating-modal'); }
+        function removeRating() { currentPickerValue = 0; saveRating(); }
+        function onMouseDown(e) {
+            if (e.which !== 1) return;
+            const card = e.target.closest('.card'); if (!card) return;
+            dragItem = card; const rect = dragItem.getBoundingClientRect();
+            shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
+            avatar = dragItem.cloneNode(true); avatar.classList.add('drag-avatar');
+            avatar.style.cssText = `position:fixed; pointer-events:none; z-index:9999; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px;`;
+            document.body.appendChild(avatar); dragItem.classList.add('dragging');
+            updateAvatarPos(e.clientX, e.clientY);
+            document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+        }
+        function updateAvatarPos(x, y) { avatar.style.left = (x - shiftX) + 'px'; avatar.style.top = (y - shiftY) + 'px'; }
+        function onMouseMove(e) {
+            updateAvatarPos(e.clientX, e.clientY); avatar.style.display = 'none';
+            const el = document.elementFromPoint(e.clientX, e.clientY); avatar.style.display = 'flex';
+            const list = el?.closest('.task-list');
+            if (list) {
+                const draggables = [...list.querySelectorAll('.card:not(.dragging)')];
+                const after = draggables.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = e.clientY - box.top - box.height / 2;
+                    return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+                after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
+                refreshUI();
+            }
+        }
+        function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(); }
+        document.addEventListener('contextmenu', e => {
+            const card = e.target.closest('.card');
+            if (card) { e.preventDefault(); contextTarget = card; const menu = document.getElementById('context-menu'); menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; }
+        });
+        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+        function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); }
+        function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(); }
+        function copyCurrent() { if (contextTarget) navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); }
+        function closeOnOverlay(e) { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); }
+        function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(); }
+        function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
         function refreshUI() {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
                 const cards = col.querySelectorAll('.card:not(.dragging)');
                 col.querySelector('.count-badge').textContent = cards.length;
                 cards.forEach((c, i) => c.querySelector('.card-number').textContent = i + 1);
-                data[col.id] = Array.from(cards).map(t => ({
-                    title: t.querySelector('.card-title').textContent,
-                    rating: t.querySelector('.raw-rating')?.textContent || "0"
-                }));
+                data[col.id] = Array.from(cards).map(t => ({ title: t.querySelector('.card-title').textContent, rating: t.querySelector('.raw-rating')?.textContent || "0" }));
             });
-            localStorage.setItem('boardData', JSON.stringify(data));
-            localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
+            localStorage.setItem('boardData', JSON.stringify(data)); localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
         }
-
         function handleSearch() {
             const q = document.getElementById('global-search').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
@@ -492,26 +374,12 @@
                 c.style.opacity = (!q || title.includes(q)) ? "1" : "0.1";
             });
         }
-
-        function exportData() {
-            const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'movie_tracker_backup.json'; a.click();
-        }
-
-        function importData(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const data = JSON.parse(ev.target.result);
-                localStorage.setItem('boardData', JSON.stringify(data.boardData));
-                localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies));
-                location.reload();
-            };
-            reader.readAsText(file);
-        }
-
+        const clearBtn = document.getElementById('clear-btn');
+        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(); closeModal('trash-modal'); }, 800); });
+        clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
+        function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); }
+        function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
+        
         window.onload = () => {
             initPicker();
             const theme = localStorage.getItem('theme') || 'dark';
