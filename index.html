@@ -109,7 +109,7 @@
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
         .modal-content { background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
 
-        /* Корзина: Уменьшенная высота плашек */
+        /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
         #trash-content::-webkit-scrollbar { display: none; }
         .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
@@ -117,7 +117,7 @@
         #trash-content .settings-row { 
             border-radius: 50px; 
             margin-bottom: 8px; 
-            padding: 10px 25px; /* Уменьшил высоту плашки в корзине */
+            padding: 10px 25px; 
         }
 
         /* Остальное */
@@ -164,6 +164,27 @@
         <button class="btn" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
+    <div class="modal-overlay" id="auth-modal" style="background-color: rgba(0, 0, 0, 0.95);">
+        <div class="modal-content" style="text-align: center; max-width: 400px; padding: 40px 30px;">
+            <h2 style="margin-bottom: 15px;">Синхронизация</h2>
+            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Введите имя для создания нового профиля ИЛИ введите готовый ключ для восстановления.</p>
+
+            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px; margin-bottom: 15px;">
+                <h4 style="margin-bottom: 15px; font-size: 16px;">Новый профиль</h4>
+                <input type="text" id="auth-name" placeholder="Ваше имя..." class="search-input" style="margin-bottom: 15px; text-align: center;">
+                <button class="btn" style="width: 100%;" onclick="createNewProfile()">Создать профиль</button>
+            </div>
+
+            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px;">
+                <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть ключ?</h4>
+                <input type="text" id="auth-key" placeholder="Имя-XXXXX" class="search-input" style="margin-bottom: 15px; text-align: center;">
+                <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по ключу</button>
+            </div>
+            
+            <div id="auth-status" style="margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px;"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
@@ -195,15 +216,26 @@
     <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
+            
+            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 20px;">
+                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">ОБЛАЧНЫЙ ПРОФИЛЬ</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px;">
+                    <button class="btn" style="padding: 10px 20px; flex: unset;" onclick="copySettingsKey()">Копировать</button>
+                </div>
+                <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="logoutProfile()">Выйти из профиля</button>
+            </div>
+
             <div class="settings-row" style="margin-bottom:15px;">
                 <span>Темная тема</span>
                 <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button class="btn" onclick="exportData()">Экспорт</button>
+                <button class="btn" onclick="exportData()">Экспорт бэкапа</button>
                 <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
             </div>
             <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
+            
             <button class="btn" style="margin-top:20px; background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
@@ -231,7 +263,105 @@
         const starPath = "M29.895,12.52c-0.235-0.704-0.829-1.209-1.549-1.319l-7.309-1.095l-3.29-6.984C17.42,2.43,16.751,2,16,2 s-1.42,0.43-1.747,1.122l-3.242,6.959l-7.357,1.12c-0.72,0.11-1.313,0.615-1.549,1.319c-0.241,0.723-0.063,1.507,0.465,2.046 l5.321,5.446l-1.257,7.676c-0.125,0.767,0.185,1.518,0.811,1.959c0.602,0.427,1.376,0.469,2.02,0.114l6.489-3.624l6.581,3.624 c0.646,0.355,1.418,0.311,2.02-0.114c0.626-0.441,0.937-1.192,0.811-1.959l-1.259-7.686l5.323-5.436 C29.958,14.027,30.136,13.243,29.895,12.52z";
         let dragItem = null, avatar = null, shiftX, shiftY, contextTarget = null;
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
-        let holdTimer, currentPickerValue = 0;
+        let holdTimer, cloudTimer, currentPickerValue = 0;
+
+        // --- ЛОГИКА АВТОРИЗАЦИИ И ОБЛАКА ---
+
+        function generateShortCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 5; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function showAuthStatus(msg, isError = false) {
+            const el = document.getElementById('auth-status');
+            el.textContent = msg;
+            el.style.color = isError ? 'var(--danger)' : 'var(--rating-green)';
+        }
+
+        async function createNewProfile() {
+            const nameInput = document.getElementById('auth-name').value.trim();
+            // Оставляем только буквы, цифры, дефис и подчеркивание, убираем пробелы
+            const cleanName = nameInput.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '');
+            
+            if (!cleanName) {
+                return showAuthStatus('Пожалуйста, введите корректное имя', true);
+            }
+
+            const code = generateShortCode();
+            const fullKey = `${cleanName}-${code}`;
+
+            localStorage.setItem('syncKey', fullKey);
+            alert(`Ваш личный ключ: ${fullKey}\n\nОбязательно сохраните его, чтобы не потерять список фильмов! Вы также сможете скопировать его в Настройках.`);
+            
+            document.getElementById('auth-modal').classList.remove('is-open');
+            refreshUI(); // Запускает сохранение пустого профиля в облако
+        }
+
+        async function loginWithKey() {
+            const key = document.getElementById('auth-key').value.trim();
+            if (!key) return showAuthStatus('Пожалуйста, введите ключ', true);
+
+            showAuthStatus('Ищем профиль в облаке...');
+            
+            try {
+                const res = await fetch(`/api/load?key=${key}`);
+                if (res.status === 404) {
+                    return showAuthStatus('Профиль не найден. Проверьте ключ.', true);
+                }
+                if (!res.ok) throw new Error();
+                
+                const cloudData = await res.json();
+                
+                // Успешно загрузили - сохраняем локально и обновляем
+                localStorage.setItem('syncKey', key);
+                localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
+                localStorage.setItem('deletedMovies', JSON.stringify(cloudData.deletedMovies || []));
+                
+                showAuthStatus('Успешно! Синхронизируем...', false);
+                setTimeout(() => location.reload(), 800);
+
+            } catch (e) {
+                showAuthStatus('Ошибка сети. Попробуйте позже.', true);
+            }
+        }
+
+        async function pushToCloud(boardData, deletedList) {
+            const key = localStorage.getItem('syncKey');
+            if (!key) return; // Если нет ключа (еще не вошел) - не пушим
+            try {
+                await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, boardData, deletedMovies: deletedList })
+                });
+            } catch (e) {
+                console.error('Сбой фонового сохранения в облако', e);
+            }
+        }
+
+        function copySettingsKey() {
+            const key = document.getElementById('settings-sync-key').value;
+            if (key) {
+                navigator.clipboard.writeText(key);
+                alert('Ключ скопирован в буфер обмена!');
+            }
+        }
+
+        function logoutProfile() {
+            if (confirm("Вы уверены, что хотите выйти из профиля? Убедитесь, что вы сохранили свой ключ!")) {
+                localStorage.removeItem('syncKey');
+                localStorage.removeItem('boardData');
+                localStorage.removeItem('deletedMovies');
+                location.reload();
+            }
+        }
+
+
+        // --- ОСНОВНАЯ ЛОГИКА ИНТЕРФЕЙСА ---
 
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
@@ -256,10 +386,13 @@
             if (id === 'trash-modal') renderTrash();
             if (id === 'edit-modal') {
                 if (!contextTarget) {
-                    input.value = ''; // Очистка при новом добавлении
+                    input.value = '';
                     document.getElementById('modal-title').textContent = "Добавить фильм";
                 }
                 setTimeout(() => input.focus(), 100);
+            }
+            if (id === 'settings-modal') {
+                document.getElementById('settings-sync-key').value = localStorage.getItem('syncKey') || '';
             }
             document.getElementById(id).classList.add('is-open');
         }
@@ -267,6 +400,13 @@
         function closeModal(id) { 
             document.getElementById(id).classList.remove('is-open'); 
             if (id === 'edit-modal') contextTarget = null; 
+        }
+
+        function closeOnOverlay(e) { 
+            // Запрещаем закрывать модалку авторизации кликом мимо
+            if (e.target.classList.contains('modal-overlay') && e.target.id !== 'auth-modal') {
+                closeModal(e.target.id); 
+            }
         }
 
         function renderTrash() {
@@ -280,7 +420,7 @@
             });
         }
 
-        // --- Все остальные функции (рейтинг, drag, темы, экспорт) остаются рабочими ---
+        // --- РЕЙТИНГ ---
         function initPicker() {
             const container = document.getElementById('picker-container');
             container.innerHTML = '';
@@ -318,6 +458,8 @@
         function openRating() { const raw = contextTarget.querySelector('.raw-rating'); currentPickerValue = raw ? parseFloat(raw.textContent) : 0; updatePickerStars(currentPickerValue); openModal('rating-modal'); }
         function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
+        
+        // --- DRAG & DROP ---
         function onMouseDown(e) {
             if (e.which !== 1) return;
             const card = e.target.closest('.card'); if (!card) return;
@@ -346,17 +488,35 @@
             }
         }
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(); }
+        
+        // --- КОНТЕКСТНОЕ МЕНЮ И УТИЛИТЫ ---
         document.addEventListener('contextmenu', e => {
             const card = e.target.closest('.card');
             if (card) { e.preventDefault(); contextTarget = card; const menu = document.getElementById('context-menu'); menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; }
         });
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+        
         function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); }
         function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(); }
         function copyCurrent() { if (contextTarget) navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); }
-        function closeOnOverlay(e) { if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id); }
         function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(); }
         function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
+        
+        function handleSearch() {
+            const q = document.getElementById('global-search').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                const title = c.querySelector('.card-title').textContent.toLowerCase();
+                c.style.opacity = (!q || title.includes(q)) ? "1" : "0.1";
+            });
+        }
+        
+        const clearBtn = document.getElementById('clear-btn');
+        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(); closeModal('trash-modal'); }, 800); });
+        clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
+        
+        function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); }
+        function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
+        
         function refreshUI() {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
@@ -365,26 +525,31 @@
                 cards.forEach((c, i) => c.querySelector('.card-number').textContent = i + 1);
                 data[col.id] = Array.from(cards).map(t => ({ title: t.querySelector('.card-title').textContent, rating: t.querySelector('.raw-rating')?.textContent || "0" }));
             });
-            localStorage.setItem('boardData', JSON.stringify(data)); localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
+            
+            localStorage.setItem('boardData', JSON.stringify(data)); 
+            localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
+
+            // Сохраняем в облако с дебаунсом, чтобы не спамить Vercel при быстром драг-н-дропе
+            clearTimeout(cloudTimer);
+            cloudTimer = setTimeout(() => {
+                pushToCloud(data, deletedMovies);
+            }, 600);
         }
-        function handleSearch() {
-            const q = document.getElementById('global-search').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const title = c.querySelector('.card-title').textContent.toLowerCase();
-                c.style.opacity = (!q || title.includes(q)) ? "1" : "0.1";
-            });
-        }
-        const clearBtn = document.getElementById('clear-btn');
-        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(); closeModal('trash-modal'); }, 800); });
-        clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
-        function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); }
-        function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
-        
+
+        // --- ЗАПУСК ---
         window.onload = () => {
             initPicker();
             const theme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('theme-checkbox').checked = (theme === 'dark');
+            
+            // Если нет ключа — показываем окно авторизации
+            if (!localStorage.getItem('syncKey')) {
+                document.getElementById('auth-modal').classList.add('is-open');
+                return; // Ждем пока пользователь введет ключ или создаст новый
+            }
+
+            // Если ключ есть — просто грузим локальные данные
             const saved = JSON.parse(localStorage.getItem('boardData'));
             if (saved) {
                 Object.keys(saved).forEach(z => {
