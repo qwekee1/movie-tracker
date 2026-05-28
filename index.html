@@ -109,7 +109,7 @@
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
         .modal-content { background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
 
-        /* Корзина */
+        /* Корзина: Уменьшенная высота плашек */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
         #trash-content::-webkit-scrollbar { display: none; }
         .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
@@ -167,7 +167,7 @@
     <div class="modal-overlay" id="auth-modal" style="background-color: rgba(0, 0, 0, 0.95);">
         <div class="modal-content" style="text-align: center; max-width: 400px; padding: 40px 30px;">
             <h2 style="margin-bottom: 15px;">Синхронизация</h2>
-            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Введите имя для создания нового профиля ИЛИ введите готовый ключ для восстановления.</p>
+            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый 5-значный код.</p>
 
             <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px; margin-bottom: 15px;">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Новый профиль</h4>
@@ -176,9 +176,9 @@
             </div>
 
             <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px;">
-                <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть ключ?</h4>
-                <input type="text" id="auth-key" placeholder="Имя-XXXXX" class="search-input" style="margin-bottom: 15px; text-align: center;">
-                <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по ключу</button>
+                <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть код?</h4>
+                <input type="text" id="auth-key" placeholder="Например: 50S4L" maxlength="5" class="search-input" style="margin-bottom: 15px; text-align: center; text-transform: uppercase;">
+                <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
             </div>
             
             <div id="auth-status" style="margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px;"></div>
@@ -218,9 +218,9 @@
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
             
             <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 20px;">
-                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">ОБЛАЧНЫЙ ПРОФИЛЬ</div>
+                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">КОД ДОСТУПА</div>
                 <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px;">
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
                     <button class="btn" style="padding: 10px 20px; flex: unset;" onclick="copySettingsKey()">Копировать</button>
                 </div>
                 <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="logoutProfile()">Выйти из профиля</button>
@@ -235,7 +235,6 @@
                 <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
             </div>
             <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
-            
             <button class="btn" style="margin-top:20px; background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
@@ -284,40 +283,41 @@
 
         async function createNewProfile() {
             const nameInput = document.getElementById('auth-name').value.trim();
-            // Оставляем только буквы, цифры, дефис и подчеркивание, убираем пробелы
             const cleanName = nameInput.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '');
             
             if (!cleanName) {
-                return showAuthStatus('Пожалуйста, введите корректное имя', true);
+                return showAuthStatus('Пожалуйста, введите имя', true);
             }
 
-            const code = generateShortCode();
-            const fullKey = `${cleanName}-${code}`;
+            const code = generateShortCode(); // Только 5 символов
 
-            localStorage.setItem('syncKey', fullKey);
-            alert(`Ваш личный ключ: ${fullKey}\n\nОбязательно сохраните его, чтобы не потерять список фильмов! Вы также сможете скопировать его в Настройках.`);
+            localStorage.setItem('syncKey', code);
+            localStorage.setItem('syncName', cleanName); // Сохраняем имя локально для пушей
+            
+            alert(`Ваш личный код доступа:\n\n${code}\n\nОбязательно сохраните его! Вы также сможете скопировать его в Настройках.`);
             
             document.getElementById('auth-modal').classList.remove('is-open');
-            refreshUI(); // Запускает сохранение пустого профиля в облако
+            refreshUI(); // Создаст файл sync-CODE_NAME.json в облаке
         }
 
         async function loginWithKey() {
-            const key = document.getElementById('auth-key').value.trim();
-            if (!key) return showAuthStatus('Пожалуйста, введите ключ', true);
+            const key = document.getElementById('auth-key').value.trim().toUpperCase();
+            if (!key || key.length !== 5) return showAuthStatus('Введите корректный 5-значный код', true);
 
             showAuthStatus('Ищем профиль в облаке...');
             
             try {
                 const res = await fetch(`/api/load?key=${key}`);
                 if (res.status === 404) {
-                    return showAuthStatus('Профиль не найден. Проверьте ключ.', true);
+                    return showAuthStatus('Профиль не найден. Проверьте код.', true);
                 }
                 if (!res.ok) throw new Error();
                 
                 const cloudData = await res.json();
                 
-                // Успешно загрузили - сохраняем локально и обновляем
+                // Сохраняем код, загруженные списки и ИМЯ (оно пришло из внутренностей файла)
                 localStorage.setItem('syncKey', key);
+                localStorage.setItem('syncName', cloudData.userName || 'User');
                 localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
                 localStorage.setItem('deletedMovies', JSON.stringify(cloudData.deletedMovies || []));
                 
@@ -331,12 +331,16 @@
 
         async function pushToCloud(boardData, deletedList) {
             const key = localStorage.getItem('syncKey');
-            if (!key) return; // Если нет ключа (еще не вошел) - не пушим
+            const userName = localStorage.getItem('syncName') || 'User';
+            
+            if (!key) return; 
+
             try {
                 await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key, boardData, deletedMovies: deletedList })
+                    // Отправляем и код и имя на сервер
+                    body: JSON.stringify({ key, userName, boardData, deletedMovies: deletedList })
                 });
             } catch (e) {
                 console.error('Сбой фонового сохранения в облако', e);
@@ -347,19 +351,19 @@
             const key = document.getElementById('settings-sync-key').value;
             if (key) {
                 navigator.clipboard.writeText(key);
-                alert('Ключ скопирован в буфер обмена!');
+                alert('Код скопирован в буфер обмена!');
             }
         }
 
         function logoutProfile() {
-            if (confirm("Вы уверены, что хотите выйти из профиля? Убедитесь, что вы сохранили свой ключ!")) {
+            if (confirm("Вы уверены, что хотите выйти? Убедитесь, что вы записали свой код!")) {
                 localStorage.removeItem('syncKey');
+                localStorage.removeItem('syncName');
                 localStorage.removeItem('boardData');
                 localStorage.removeItem('deletedMovies');
                 location.reload();
             }
         }
-
 
         // --- ОСНОВНАЯ ЛОГИКА ИНТЕРФЕЙСА ---
 
@@ -386,12 +390,13 @@
             if (id === 'trash-modal') renderTrash();
             if (id === 'edit-modal') {
                 if (!contextTarget) {
-                    input.value = '';
+                    input.value = ''; // Очистка при новом добавлении
                     document.getElementById('modal-title').textContent = "Добавить фильм";
                 }
                 setTimeout(() => input.focus(), 100);
             }
             if (id === 'settings-modal') {
+                // В настройках показываем только код
                 document.getElementById('settings-sync-key').value = localStorage.getItem('syncKey') || '';
             }
             document.getElementById(id).classList.add('is-open');
@@ -403,7 +408,7 @@
         }
 
         function closeOnOverlay(e) { 
-            // Запрещаем закрывать модалку авторизации кликом мимо
+            // Запрещаем закрывать окно авторизации кликом в пустоту
             if (e.target.classList.contains('modal-overlay') && e.target.id !== 'auth-modal') {
                 closeModal(e.target.id); 
             }
@@ -529,7 +534,6 @@
             localStorage.setItem('boardData', JSON.stringify(data)); 
             localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
 
-            // Сохраняем в облако с дебаунсом, чтобы не спамить Vercel при быстром драг-н-дропе
             clearTimeout(cloudTimer);
             cloudTimer = setTimeout(() => {
                 pushToCloud(data, deletedMovies);
@@ -546,7 +550,7 @@
             // Если нет ключа — показываем окно авторизации
             if (!localStorage.getItem('syncKey')) {
                 document.getElementById('auth-modal').classList.add('is-open');
-                return; // Ждем пока пользователь введет ключ или создаст новый
+                return; 
             }
 
             // Если ключ есть — просто грузим локальные данные
