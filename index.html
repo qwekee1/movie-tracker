@@ -136,6 +136,52 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #4cd964; }
         input:checked + .slider:before { transform: translateX(24px); }
+
+        /* ========================================= */
+        /* МОБИЛЬНАЯ АДАПТАЦИЯ (МЕДИАЗАПРОСЫ)        */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            body { 
+                padding: 15px 10px; 
+                overflow-y: auto; /* Разрешаем скролл всей страницы на мобилках */
+            }
+            .search-container { margin-bottom: 15px; }
+            .board { 
+                flex-direction: column; /* Колонки друг под другом */
+                gap: 15px; 
+                margin-bottom: 20px;
+            }
+            .column { 
+                height: 45vh; /* 45% от высоты экрана на каждую колонку */
+                min-height: 350px; 
+                max-height: 450px;
+                padding: 20px 15px; 
+                border-radius: 25px;
+            }
+            .column-header { font-size: 20px; margin-bottom: 15px; }
+            .controls { 
+                flex-wrap: wrap; /* Кнопки переносятся на новую строку */
+                gap: 10px; 
+                margin-bottom: 20px;
+            }
+            .btn { 
+                flex: 1 1 40%; /* Кнопки занимают почти половину ширины */
+                padding: 12px; 
+                font-size: 14px; 
+            }
+            .modal-content { 
+                width: 95%; 
+                padding: 25px 20px; 
+            }
+            .card { 
+                padding: 14px 15px; 
+                font-size: 14px; 
+            }
+            .rating-wrapper { width: 85px; }
+            .card-number { width: 25px; font-size: 12px; }
+            .settings-row { padding: 12px 20px; }
+            #trash-content .settings-row { padding: 10px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -298,7 +344,7 @@
             alert(`Ваш личный код доступа:\n\n${code}\n\nОбязательно сохраните его! Вы также сможете скопировать его в Настройках.`);
             
             document.getElementById('auth-modal').classList.remove('is-open');
-            refreshUI(true); // Сохраняем начальный файл в облако
+            refreshUI(true); 
         }
 
         async function loginWithKey() {
@@ -360,7 +406,10 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>${getStarsHTML(rating)}`;
-            card.addEventListener('mousedown', onMouseDown);
+            
+            // Универсальные слушатели для перетаскивания (ПК + Смартфон)
+            card.addEventListener('mousedown', onDragStart);
+            card.addEventListener('touchstart', onDragStart, { passive: false });
             return card;
         }
 
@@ -446,35 +495,78 @@
         function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(true); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
         
-        // --- DRAG & DROP ---
-        function onMouseDown(e) {
-            if (e.which !== 1) return;
+        // --- DRAG & DROP (С УЧЕТОМ СЕНСОРА НА ТЕЛЕФОНЕ) ---
+        function onDragStart(e) {
+            // Для мыши: реагируем только на левую кнопку
+            if (e.type === 'mousedown' && e.which !== 1) return;
+            
             const card = e.target.closest('.card'); if (!card) return;
-            dragItem = card; const rect = dragItem.getBoundingClientRect();
-            shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
-            avatar = dragItem.cloneNode(true); avatar.classList.add('drag-avatar');
+
+            // Запрещаем перетаскивание, если тапнули прямо по звездам рейтинга (чтобы открывалось меню)
+            if (e.target.closest('.rating-wrapper')) return;
+
+            dragItem = card; 
+            const rect = dragItem.getBoundingClientRect();
+            
+            // Определяем координаты в зависимости от типа устройства
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            shiftX = clientX - rect.left; 
+            shiftY = clientY - rect.top;
+            
+            avatar = dragItem.cloneNode(true); 
+            avatar.classList.add('drag-avatar');
             avatar.style.cssText = `position:fixed; pointer-events:none; z-index:9999; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px;`;
-            document.body.appendChild(avatar); dragItem.classList.add('dragging');
-            updateAvatarPos(e.clientX, e.clientY);
-            document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
+            document.body.appendChild(avatar); 
+            dragItem.classList.add('dragging');
+            
+            updateAvatarPos(clientX, clientY);
+            
+            document.addEventListener('mousemove', onDragMove); 
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchmove', onDragMove, { passive: false }); 
+            document.addEventListener('touchend', onDragEnd);
         }
+
         function updateAvatarPos(x, y) { avatar.style.left = (x - shiftX) + 'px'; avatar.style.top = (y - shiftY) + 'px'; }
-        function onMouseMove(e) {
-            updateAvatarPos(e.clientX, e.clientY); avatar.style.display = 'none';
-            const el = document.elementFromPoint(e.clientX, e.clientY); avatar.style.display = 'flex';
+
+        function onDragMove(e) {
+            if (!dragItem) return;
+            // Блокируем стандартный скролл страницы на телефоне во время перетаскивания карточки
+            if (e.type === 'touchmove') e.preventDefault(); 
+            
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            updateAvatarPos(clientX, clientY); 
+            avatar.style.display = 'none';
+            const el = document.elementFromPoint(clientX, clientY); 
+            avatar.style.display = 'flex';
+            
             const list = el?.closest('.task-list');
             if (list) {
                 const draggables = [...list.querySelectorAll('.card:not(.dragging)')];
                 const after = draggables.reduce((closest, child) => {
                     const box = child.getBoundingClientRect();
-                    const offset = e.clientY - box.top - box.height / 2;
+                    const offset = clientY - box.top - box.height / 2;
                     return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
                 after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
                 refreshUI(true);
             }
         }
-        function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
+
+        function onDragEnd() { 
+            if (avatar) avatar.remove(); 
+            if (dragItem) dragItem.classList.remove('dragging'); 
+            avatar = dragItem = null; 
+            document.removeEventListener('mousemove', onDragMove); 
+            document.removeEventListener('mouseup', onDragEnd); 
+            document.removeEventListener('touchmove', onDragMove); 
+            document.removeEventListener('touchend', onDragEnd); 
+            refreshUI(true); 
+        }
         
         // --- КОНТЕКСТНОЕ МЕНЮ И УТИЛИТЫ ---
         document.addEventListener('contextmenu', e => {
@@ -517,10 +609,9 @@
                     if(list) saved[z].forEach(obj => list.appendChild(createCard(obj.title, obj.rating)));
                 });
             }
-            refreshUI(false); // false означает: не отправлять данные в облако, мы их только что загрузили
+            refreshUI(false); // Отрисовываем интерфейс без отправки свежезагруженных данных обратно в облако
         }
 
-        // pushToCloudFlag определяет, нужно ли после обновления интерфейса запускать таймер отправки на сервер
         function refreshUI(pushToCloudFlag = true) {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
@@ -547,31 +638,27 @@
             
             const key = localStorage.getItem('syncKey');
             
-            // Если нет кода - показываем окно входа
             if (!key) {
                 document.getElementById('auth-modal').classList.add('is-open');
                 return; 
             }
 
-            // 1. Моментально рисуем локальные данные (чтобы не было белого экрана)
+            // Быстрая отрисовка того, что было в кэше телефона
             loadBoardFromStorage();
 
-            // 2. В фоне стучимся в облако за свежими данными
+            // Фоновое скачивание свежих данных из облака
             try {
                 const res = await fetch(`/api/load?key=${key}`);
                 if (res.ok) {
                     const cloudData = await res.json();
-                    
-                    // Перезаписываем локальную память свежими данными из облака
                     localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
                     deletedMovies = cloudData.deletedMovies || [];
                     localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
-                    
-                    // Перерисовываем доску с новыми данными
+                    // Незаметно перерисовываем доску новыми данными
                     loadBoardFromStorage();
                 }
             } catch (e) {
-                console.log('Работаем в оффлайн-режиме, нет сети для синхронизации');
+                console.log('Работаем локально, нет сети.');
             }
         };
     </script>
