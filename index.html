@@ -109,7 +109,7 @@
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
         .modal-content { background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
 
-        /* Корзина: Уменьшенная высота плашек */
+        /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
         #trash-content::-webkit-scrollbar { display: none; }
         .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
@@ -177,7 +177,7 @@
 
             <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px;">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть код?</h4>
-                <input type="text" id="auth-key" placeholder="Например: 50S4L" maxlength="5" class="search-input" style="margin-bottom: 15px; text-align: center; text-transform: uppercase;">
+                <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" class="search-input" style="margin-bottom: 15px; text-align: center; text-transform: uppercase;">
                 <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
             </div>
             
@@ -217,25 +217,30 @@
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
             
-            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 20px;">
-                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">КОД ДОСТУПА</div>
-                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
-                    <button class="btn" style="padding: 10px 20px; flex: unset;" onclick="copySettingsKey()">Копировать</button>
+            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
+                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
+                    <button class="btn" style="padding: 12px 20px; flex: 0 0 auto; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
                 </div>
                 <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="logoutProfile()">Выйти из профиля</button>
             </div>
 
-            <div class="settings-row" style="margin-bottom:15px;">
+            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
+                <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Бекап</div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="exportData()">Экспорт</button>
+                    <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
+                </div>
+                <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
+            </div>
+
+            <div class="settings-row" style="margin-bottom:20px;">
                 <span>Темная тема</span>
                 <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" onclick="exportData()">Экспорт бэкапа</button>
-                <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
-            </div>
-            <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
-            <button class="btn" style="margin-top:20px; background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
+            
+            <button class="btn" style="background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -264,7 +269,7 @@
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer, cloudTimer, currentPickerValue = 0;
 
-        // --- ЛОГИКА АВТОРИЗАЦИИ И ОБЛАКА ---
+        // --- АВТОРИЗАЦИЯ И СИНХРОНИЗАЦИЯ ---
 
         function generateShortCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -284,20 +289,16 @@
         async function createNewProfile() {
             const nameInput = document.getElementById('auth-name').value.trim();
             const cleanName = nameInput.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '');
-            
-            if (!cleanName) {
-                return showAuthStatus('Пожалуйста, введите имя', true);
-            }
+            if (!cleanName) return showAuthStatus('Пожалуйста, введите имя', true);
 
-            const code = generateShortCode(); // Только 5 символов
-
+            const code = generateShortCode();
             localStorage.setItem('syncKey', code);
-            localStorage.setItem('syncName', cleanName); // Сохраняем имя локально для пушей
+            localStorage.setItem('syncName', cleanName);
             
             alert(`Ваш личный код доступа:\n\n${code}\n\nОбязательно сохраните его! Вы также сможете скопировать его в Настройках.`);
             
             document.getElementById('auth-modal').classList.remove('is-open');
-            refreshUI(); // Создаст файл sync-CODE_NAME.json в облаке
+            refreshUI(true); // Сохраняем начальный файл в облако
         }
 
         async function loginWithKey() {
@@ -308,14 +309,10 @@
             
             try {
                 const res = await fetch(`/api/load?key=${key}`);
-                if (res.status === 404) {
-                    return showAuthStatus('Профиль не найден. Проверьте код.', true);
-                }
+                if (res.status === 404) return showAuthStatus('Профиль не найден. Проверьте код.', true);
                 if (!res.ok) throw new Error();
                 
                 const cloudData = await res.json();
-                
-                // Сохраняем код, загруженные списки и ИМЯ (оно пришло из внутренностей файла)
                 localStorage.setItem('syncKey', key);
                 localStorage.setItem('syncName', cloudData.userName || 'User');
                 localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
@@ -323,7 +320,6 @@
                 
                 showAuthStatus('Успешно! Синхронизируем...', false);
                 setTimeout(() => location.reload(), 800);
-
             } catch (e) {
                 showAuthStatus('Ошибка сети. Попробуйте позже.', true);
             }
@@ -332,19 +328,15 @@
         async function pushToCloud(boardData, deletedList) {
             const key = localStorage.getItem('syncKey');
             const userName = localStorage.getItem('syncName') || 'User';
-            
             if (!key) return; 
 
             try {
                 await fetch('/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Отправляем и код и имя на сервер
                     body: JSON.stringify({ key, userName, boardData, deletedMovies: deletedList })
                 });
-            } catch (e) {
-                console.error('Сбой фонового сохранения в облако', e);
-            }
+            } catch (e) { console.error('Сбой фонового сохранения в облако', e); }
         }
 
         function copySettingsKey() {
@@ -357,15 +349,12 @@
 
         function logoutProfile() {
             if (confirm("Вы уверены, что хотите выйти? Убедитесь, что вы записали свой код!")) {
-                localStorage.removeItem('syncKey');
-                localStorage.removeItem('syncName');
-                localStorage.removeItem('boardData');
-                localStorage.removeItem('deletedMovies');
+                localStorage.clear();
                 location.reload();
             }
         }
 
-        // --- ОСНОВНАЯ ЛОГИКА ИНТЕРФЕЙСА ---
+        // --- ИНТЕРФЕЙС И ЛОГИКА ---
 
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
@@ -381,7 +370,7 @@
                 if (contextTarget) contextTarget.querySelector('.card-title').textContent = val;
                 else document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
                 closeModal('edit-modal');
-                refreshUI();
+                refreshUI(true);
             }
         }
 
@@ -389,14 +378,10 @@
             const input = document.getElementById('movie-input');
             if (id === 'trash-modal') renderTrash();
             if (id === 'edit-modal') {
-                if (!contextTarget) {
-                    input.value = ''; // Очистка при новом добавлении
-                    document.getElementById('modal-title').textContent = "Добавить фильм";
-                }
+                if (!contextTarget) { input.value = ''; document.getElementById('modal-title').textContent = "Добавить фильм"; }
                 setTimeout(() => input.focus(), 100);
             }
             if (id === 'settings-modal') {
-                // В настройках показываем только код
                 document.getElementById('settings-sync-key').value = localStorage.getItem('syncKey') || '';
             }
             document.getElementById(id).classList.add('is-open');
@@ -408,10 +393,7 @@
         }
 
         function closeOnOverlay(e) { 
-            // Запрещаем закрывать окно авторизации кликом в пустоту
-            if (e.target.classList.contains('modal-overlay') && e.target.id !== 'auth-modal') {
-                closeModal(e.target.id); 
-            }
+            if (e.target.classList.contains('modal-overlay') && e.target.id !== 'auth-modal') closeModal(e.target.id); 
         }
 
         function renderTrash() {
@@ -461,7 +443,7 @@
             return html + `<span style="display:none" class="raw-rating">${num}</span></div>`;
         }
         function openRating() { const raw = contextTarget.querySelector('.raw-rating'); currentPickerValue = raw ? parseFloat(raw.textContent) : 0; updatePickerStars(currentPickerValue); openModal('rating-modal'); }
-        function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(); } closeModal('rating-modal'); }
+        function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(true); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
         
         // --- DRAG & DROP ---
@@ -489,10 +471,10 @@
                     return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
                 after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
-                refreshUI();
+                refreshUI(true);
             }
         }
-        function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(); }
+        function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
         // --- КОНТЕКСТНОЕ МЕНЮ И УТИЛИТЫ ---
         document.addEventListener('contextmenu', e => {
@@ -502,9 +484,9 @@
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
         
         function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); }
-        function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(); }
+        function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(true); }
         function copyCurrent() { if (contextTarget) navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); }
-        function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(); }
+        function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(true); }
         function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
         
         function handleSearch() {
@@ -516,13 +498,30 @@
         }
         
         const clearBtn = document.getElementById('clear-btn');
-        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(); closeModal('trash-modal'); }, 800); });
+        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); }, 800); });
         clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
         
         function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); }
         function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
         
-        function refreshUI() {
+        // --- ФУНКЦИИ РЕНДЕРА И ИНИЦИАЛИЗАЦИИ ---
+
+        function loadBoardFromStorage() {
+            const saved = JSON.parse(localStorage.getItem('boardData'));
+            if (saved) {
+                document.getElementById('zone-watchlist').querySelector('.task-list').innerHTML = '';
+                document.getElementById('zone-watched').querySelector('.task-list').innerHTML = '';
+                
+                Object.keys(saved).forEach(z => {
+                    const list = document.getElementById(z)?.querySelector('.task-list');
+                    if(list) saved[z].forEach(obj => list.appendChild(createCard(obj.title, obj.rating)));
+                });
+            }
+            refreshUI(false); // false означает: не отправлять данные в облако, мы их только что загрузили
+        }
+
+        // pushToCloudFlag определяет, нужно ли после обновления интерфейса запускать таймер отправки на сервер
+        function refreshUI(pushToCloudFlag = true) {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
                 const cards = col.querySelectorAll('.card:not(.dragging)');
@@ -534,34 +533,46 @@
             localStorage.setItem('boardData', JSON.stringify(data)); 
             localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
 
-            clearTimeout(cloudTimer);
-            cloudTimer = setTimeout(() => {
-                pushToCloud(data, deletedMovies);
-            }, 600);
+            if (pushToCloudFlag) {
+                clearTimeout(cloudTimer);
+                cloudTimer = setTimeout(() => pushToCloud(data, deletedMovies), 600);
+            }
         }
 
-        // --- ЗАПУСК ---
-        window.onload = () => {
+        window.onload = async () => {
             initPicker();
             const theme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('theme-checkbox').checked = (theme === 'dark');
             
-            // Если нет ключа — показываем окно авторизации
-            if (!localStorage.getItem('syncKey')) {
+            const key = localStorage.getItem('syncKey');
+            
+            // Если нет кода - показываем окно входа
+            if (!key) {
                 document.getElementById('auth-modal').classList.add('is-open');
                 return; 
             }
 
-            // Если ключ есть — просто грузим локальные данные
-            const saved = JSON.parse(localStorage.getItem('boardData'));
-            if (saved) {
-                Object.keys(saved).forEach(z => {
-                    const list = document.getElementById(z)?.querySelector('.task-list');
-                    if(list) saved[z].forEach(obj => list.appendChild(createCard(obj.title, obj.rating)));
-                });
+            // 1. Моментально рисуем локальные данные (чтобы не было белого экрана)
+            loadBoardFromStorage();
+
+            // 2. В фоне стучимся в облако за свежими данными
+            try {
+                const res = await fetch(`/api/load?key=${key}`);
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    
+                    // Перезаписываем локальную память свежими данными из облака
+                    localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
+                    deletedMovies = cloudData.deletedMovies || [];
+                    localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
+                    
+                    // Перерисовываем доску с новыми данными
+                    loadBoardFromStorage();
+                }
+            } catch (e) {
+                console.log('Работаем в оффлайн-режиме, нет сети для синхронизации');
             }
-            refreshUI();
         };
     </script>
 </body>
