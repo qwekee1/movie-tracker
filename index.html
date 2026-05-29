@@ -57,6 +57,30 @@
             transition: background-color 0.3s ease;
         }
 
+        /* Toast-уведомление (всплывашка) */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--rating-green);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 4000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            top: 40px;
+        }
+
         /* Поиск */
         .search-container { width: 100%; max-width: 1240px; margin-bottom: 30px; display: flex; }
         .search-input {
@@ -70,7 +94,13 @@
             background-color: var(--col-bg); flex: 1; max-width: 600px; height: 720px;
             border-radius: 30px; padding: 30px 20px; display: flex; flex-direction: column; transition: background-color 0.3s ease;
         }
-        .column-header { color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; text-align: center; display: flex; justify-content: center; gap: 8px; }
+        
+        .column-header { 
+            color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; 
+            text-align: center; display: flex; justify-content: center; gap: 8px;
+            -webkit-tap-highlight-color: transparent; /* Убираем синее выделение при тапе */
+        }
+        
         .count-badge { color: var(--header-sub); font-weight: 500; }
 
         .task-list { 
@@ -142,7 +172,7 @@
         /* ========================================= */
         @media (max-width: 768px) {
             body { 
-                padding: 15px 10px 110px 10px; /* Добавили место снизу под плавающее меню кнопок */
+                padding: 15px 10px 110px 10px; 
                 overflow-y: auto; 
             }
             .search-container { margin-bottom: 15px; }
@@ -152,7 +182,7 @@
                 margin-bottom: 0;
             }
             
-            /* Логика колонок-аккордеонов */
+            /* Логика колонок-аккордеонов (Плавная анимация) */
             .column { 
                 height: auto; 
                 min-height: unset; 
@@ -163,33 +193,41 @@
             }
             .column-header { 
                 font-size: 20px; 
-                cursor: pointer; /* Делаем заголовок кликабельным */
+                cursor: pointer; 
+                margin-bottom: 0; /* Убираем жесткий марджин, он будет на списке */
             }
-            .column.mobile-closed {
-                padding: 15px; /* Скрытая колонка становится компактной */
-            }
-            .column.mobile-closed .task-list {
-                display: none; /* Прячем список фильмов у закрытой колонки */
-            }
-            .column.mobile-closed .column-header {
-                margin-bottom: 0; 
-                opacity: 0.6; /* Немного тушим закрытую */
-            }
-            .column:not(.mobile-closed) .column-header { 
-                margin-bottom: 15px; 
+            
+            .task-list {
+                max-height: 70vh; /* Максимальная высота при открытии */
+                opacity: 1;
+                margin-top: 15px;
+                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
             }
 
-            /* Плавающие (sticky) кнопки снизу с "воздухом" */
+            .column.mobile-closed {
+                padding: 15px; 
+            }
+            .column.mobile-closed .task-list {
+                max-height: 0;
+                opacity: 0;
+                margin-top: 0;
+                overflow: hidden;
+            }
+            .column.mobile-closed .column-header {
+                opacity: 0.6; 
+            }
+
+            /* Плавающие (sticky) кнопки снизу */
             .controls {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                background: var(--bg-color); /* Фон, чтобы скрывать прокручивающиеся карточки */
+                background: var(--bg-color); 
                 margin: 0;
-                padding: 20px 15px 35px 15px; /* Воздух: сверху 20, снизу 35 (под челку/свайп айфона) */
+                padding: 20px 15px 35px 15px; 
                 z-index: 1000;
-                box-shadow: 0 -15px 30px var(--bg-color); /* Плавный переход тени в фон */
+                box-shadow: 0 -15px 30px var(--bg-color); 
                 display: flex;
                 gap: 10px;
                 justify-content: space-between;
@@ -222,6 +260,8 @@
             </linearGradient>
         </defs>
     </svg>
+
+    <div id="toast" class="toast">Успешно!</div>
 
     <div class="search-container">
         <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
@@ -256,6 +296,29 @@
             </div>
             
             <div id="auth-status" style="margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px;"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="info-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="margin-bottom:15px;">Ваш код доступа</h3>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его, чтобы не потерять список фильмов!</p>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
+                <input type="text" id="info-code-input" readonly style="width: 120px; background: rgba(128,128,128,0.1); border: none; padding: 15px; border-radius: 15px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
+                <button class="btn" style="flex: unset; padding: 10px 20px;" onclick="copyInfoCode()">Копировать</button>
+            </div>
+            <button class="btn" style="background:#DCDCDC; width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="logout-modal" onclick="closeOnOverlay(event)">
+        <div class="modal-content" style="text-align: center;">
+            <h3 style="margin-bottom:15px;">Выйти из профиля?</h3>
+            <p style="margin-bottom: 25px; font-size: 14px; color: var(--header-sub);">Убедитесь, что вы записали свой код. Иначе доступ к списку будет потерян.</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('logout-modal')">Отмена</button>
+                <button class="btn" style="background:var(--danger); color:white;" onclick="confirmLogout()">Выйти</button>
+            </div>
         </div>
     </div>
 
@@ -297,7 +360,7 @@
                     <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
                     <button class="btn" style="padding: 12px 20px; flex: 0 0 auto; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
                 </div>
-                <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="logoutProfile()">Выйти из профиля</button>
+                <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
 
             <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
@@ -344,6 +407,14 @@
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer, cloudTimer, currentPickerValue = 0;
 
+        // --- УТИЛИТА УВЕДОМЛЕНИЙ ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
         // --- АВТОРИЗАЦИЯ И СИНХРОНИЗАЦИЯ ---
 
         function generateShortCode() {
@@ -370,10 +441,20 @@
             localStorage.setItem('syncKey', code);
             localStorage.setItem('syncName', cleanName);
             
-            alert(`Ваш личный код доступа:\n\n${code}\n\nОбязательно сохраните его! Вы также сможете скопировать его в Настройках.`);
-            
             document.getElementById('auth-modal').classList.remove('is-open');
+            
+            // Показываем кастомную модалку с кодом вместо alert
+            document.getElementById('info-code-input').value = code;
+            openModal('info-modal');
+            
             refreshUI(true); 
+        }
+
+        function copyInfoCode() {
+            const input = document.getElementById('info-code-input');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast('Код скопирован!');
         }
 
         async function loginWithKey() {
@@ -418,15 +499,13 @@
             const key = document.getElementById('settings-sync-key').value;
             if (key) {
                 navigator.clipboard.writeText(key);
-                alert('Код скопирован в буфер обмена!');
+                showToast('Код скопирован!');
             }
         }
 
-        function logoutProfile() {
-            if (confirm("Вы уверены, что хотите выйти? Убедитесь, что вы записали свой код!")) {
-                localStorage.clear();
-                location.reload();
-            }
+        function confirmLogout() {
+            localStorage.clear();
+            location.reload();
         }
 
         // --- ИНТЕРФЕЙС И ЛОГИКА ---
@@ -439,17 +518,11 @@
             // На ПК срабатывает мышка для D&D
             card.addEventListener('mousedown', onDragStart);
             
-            // На телефонах клик по карточке открывает меню (заменитель D&D)
+            // Универсальный клик/тап для умного контекстного меню
             card.addEventListener('click', function(e) {
                 if (window.innerWidth <= 768) {
-                    if (e.target.closest('.rating-wrapper')) return; // игнор звезд
-                    e.preventDefault();
-                    contextTarget = card;
-                    const menu = document.getElementById('context-menu');
-                    menu.style.display = 'block';
-                    // Ставим меню так, чтобы не уезжало за край экрана
-                    menu.style.left = Math.max(10, Math.min(e.clientX, window.innerWidth - 220)) + 'px';
-                    menu.style.top = Math.min(e.clientY, window.innerHeight - 250) + 'px'; 
+                    if (e.target.closest('.rating-wrapper')) return; 
+                    showContextMenu(e, card);
                 }
             });
 
@@ -540,7 +613,6 @@
         
         // --- DRAG & DROP (РАБОТАЕТ ТОЛЬКО НА ПК) ---
         function onDragStart(e) {
-            // Игнор касаний телефона и правой кнопки мыши
             if (window.innerWidth <= 768 || e.which !== 1) return;
             
             const card = e.target.closest('.card'); if (!card) return;
@@ -572,10 +644,30 @@
         }
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
-        // --- КОНТЕКСТНОЕ МЕНЮ И УТИЛИТЫ ---
+        // --- УМНОЕ КОНТЕКСТНОЕ МЕНЮ ---
+        function showContextMenu(e, card) {
+            e.preventDefault(); 
+            contextTarget = card; 
+            const menu = document.getElementById('context-menu'); 
+            menu.style.display = 'block'; 
+            
+            // Рассчитываем, чтобы меню не уезжало за границы экрана
+            const menuWidth = 200;
+            const menuHeight = 220; // Примерная высота меню с 5 пунктами
+            
+            let safeX = e.clientX;
+            let safeY = e.clientY;
+
+            if (safeX + menuWidth > window.innerWidth) safeX = window.innerWidth - menuWidth - 10;
+            if (safeY + menuHeight > window.innerHeight) safeY = window.innerHeight - menuHeight - 10;
+            
+            menu.style.left = Math.max(10, safeX) + 'px'; 
+            menu.style.top = Math.max(10, safeY) + 'px';
+        }
+
         document.addEventListener('contextmenu', e => {
             const card = e.target.closest('.card');
-            if (card) { e.preventDefault(); contextTarget = card; const menu = document.getElementById('context-menu'); menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px'; }
+            if (card) showContextMenu(e, card);
         });
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
         
@@ -586,13 +678,13 @@
             const targetZoneId = currentZoneId === 'zone-watchlist' ? 'zone-watched' : 'zone-watchlist';
             
             const targetList = document.getElementById(targetZoneId).querySelector('.task-list');
-            targetList.prepend(contextTarget); // Кидаем фильм наверх соседней колонки
+            targetList.prepend(contextTarget); 
             refreshUI(true);
         }
 
         function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); }
         function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(true); }
-        function copyCurrent() { if (contextTarget) navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); }
+        function copyCurrent() { if (contextTarget) { navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); showToast('Название скопировано!'); } }
         function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(true); }
         function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
         
@@ -605,10 +697,10 @@
         }
         
         const clearBtn = document.getElementById('clear-btn');
-        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); }, 800); });
+        clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); showToast('Корзина очищена'); }, 800); });
         clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
         
-        function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); }
+        function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); showToast('Бекап скачан'); }
         function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
         
         // --- ФУНКЦИИ РЕНДЕРА И ИНИЦИАЛИЗАЦИИ ---
@@ -654,14 +746,22 @@
             // Логика Мобильных Колонок (Аккордеон)
             document.querySelectorAll('.column-header').forEach(header => {
                 header.addEventListener('click', function() {
-                    if (window.innerWidth > 768) return; // На ПК ничего не делаем
+                    if (window.innerWidth > 768) return; 
+                    
                     const parentCol = this.closest('.column');
-                    document.querySelectorAll('.column').forEach(col => {
-                        if (col === parentCol) col.classList.remove('mobile-closed');
-                        else col.classList.add('mobile-closed');
-                    });
+                    const isAlreadyClosed = parentCol.classList.contains('mobile-closed');
+                    
+                    // Сначала закрываем обе колонки
+                    document.querySelectorAll('.column').forEach(col => col.classList.add('mobile-closed'));
+                    
+                    // Если колонка, по которой кликнули, была закрыта — открываем её. 
+                    // Если была открыта, то она просто останется закрытой вместе с другой.
+                    if (isAlreadyClosed) {
+                        parentCol.classList.remove('mobile-closed');
+                    }
                 });
             });
+
             // По умолчанию закрываем вторую колонку на телефоне
             if (window.innerWidth <= 768) {
                 document.getElementById('zone-watched').classList.add('mobile-closed');
