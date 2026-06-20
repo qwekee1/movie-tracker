@@ -11,66 +11,36 @@
         })();
     </script>
     <style>
-        /* Локальные шрифты */
-        @font-face {
-            font-family: 'Gilroy';
-            src: url('./fonts/Gilroy-Regular.woff2') format('woff2');
-            font-weight: 400; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Gilroy';
-            src: url('./fonts/Gilroy-Medium.woff2') format('woff2');
-            font-weight: 500; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Gilroy';
-            src: url('./fonts/Gilroy-Semibold.woff2') format('woff2');
-            font-weight: 600; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Gilroy';
-            src: url('./fonts/Gilroy-Bold.woff2') format('woff2');
-            font-weight: 700; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Gilroy';
-            src: url('./fonts/Gilroy-Extrabold.woff2') format('woff2');
-            font-weight: 800; font-style: normal;
-        }
-
         :root {
-            --bg-color: #09090b;
-            --col-bg: transparent;
-            --col-text: #ffffff;
-            --card-bg: #18181b99;
-            --card-border: 1px solid rgba(255, 255, 255, 0.05);
-            --card-radius: 20px;
-            --card-text: #ffffff;
-            --sub-text: rgba(255, 255, 255, 0.4);
-            --header-sub: rgba(255, 255, 255, 0.4);
-            --rating-green: #10b981;
-            --rating-gray: rgba(255, 255, 255, 0.1);
+            --bg-color: #E8E8E8;
+            --col-bg: #FFFFFF;
+            --col-text: #121212;
+            --card-bg: #DCDCDC;
+            --card-text: #121212;
+            --sub-text: rgba(0, 0, 0, 0.2);
+            --header-sub: rgba(0, 0, 0, 0.4);
+            --rating-green: #28a745;
+            --rating-gray: rgba(128, 128, 128, 0.25);
             --danger: #ff4d4d;
         }
 
-        html[data-theme="light"] {
-            --bg-color: #E8E8E8;
-            --col-bg: transparent;
-            --col-text: #121212;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --card-border: 1px solid rgba(0, 0, 0, 0.05);
-            --card-text: #121212;
-            --sub-text: rgba(0, 0, 0, 0.4);
-            --header-sub: rgba(0, 0, 0, 0.5);
-            --rating-green: #28a745;
-            --rating-gray: rgba(128, 128, 128, 0.25);
+        html[data-theme="dark"] {
+            --bg-color: #0f0f0f;
+            --col-bg: #222222;
+            --col-text: #ffffff;
+            --card-bg: #333333;
+            --card-text: #ffffff;
+            --sub-text: rgb(255 255 255 / 40%);
+            --header-sub: rgb(255 255 255 / 40%);
+            --rating-green: #4cd964;
+            --rating-gray: rgba(255, 255, 255, 0.1);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Gilroy', sans-serif;
+            font-family: 'Gilroy', 'Segoe UI', sans-serif;
             -webkit-user-select: none;
             user-select: none;
         }
@@ -87,98 +57,77 @@
             transition: background-color 0.3s ease;
         }
 
-        /* Шапка с приветствием и поиском */
-        .top-bar {
-            width: 100%; max-width: 1240px; display: flex; 
-            justify-content: space-between; align-items: center; margin-bottom: 30px; height: 50px;
-        }
-        .greeting {
-            font-size: 28px; font-weight: 700; color: var(--col-text);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .greeting span { color: var(--rating-green); }
-
-        .search-wrapper {
-            position: relative; height: 50px; width: 140px; 
-            transition: width 0.3s ease; overflow: hidden;
-            border-radius: var(--card-radius); background-color: var(--card-bg); border: var(--card-border);
-        }
-        .search-wrapper.active { width: 300px; }
-        .search-input {
-            width: 100%; height: 100%; background: transparent; border: none; 
-            padding: 0 50px 0 20px; color: var(--col-text); font-size: 16px; outline: none; user-select: text;
-        }
-        .search-icon-btn {
-            position: absolute; right: 0; top: 0; width: 50px; height: 50px;
-            background: transparent; border: none; cursor: pointer; color: var(--col-text);
-            display: flex; align-items: center; justify-content: center; z-index: 2;
-        }
-        .search-label {
-            position: absolute; right: 50px; top: 0; line-height: 50px; 
-            font-weight: 600; color: var(--col-text); pointer-events: none; transition: opacity 0.2s;
-        }
-        .search-wrapper.active .search-label { opacity: 0; }
-
-        /* Toast */
+        /* Toast-уведомление (всплывашка) */
         .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--rating-green); color: white; padding: 12px 25px;
-            border-radius: 50px; font-weight: bold; font-size: 14px; opacity: 0;
-            visibility: hidden; transition: all 0.3s ease; z-index: 4000; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--rating-green);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 4000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .toast.show { opacity: 1; visibility: visible; top: 40px; }
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            top: 40px;
+        }
+
+        /* Поиск */
+        .search-container { width: 100%; max-width: 1240px; margin-bottom: 30px; display: flex; }
+        .search-input {
+            width: 100%; background-color: var(--col-bg); border: none; padding: 18px 30px;
+            border-radius: 50px; color: var(--col-text); font-size: 16px; outline: none; user-select: text;
+        }
 
         /* Доска */
         .board { display: flex; gap: 30px; width: 100%; max-width: 1240px; margin-bottom: 30px; justify-content: center; }
-        .column-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; }
-        
-        .column-title {
-            color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 15px; 
-            display: flex; align-items: center; justify-content: flex-start; gap: 10px;
-        }
-        .count-badge { 
-            background: var(--card-bg); border: var(--card-border); color: var(--header-sub); 
-            font-weight: 600; font-size: 16px; padding: 4px 12px; border-radius: 12px; 
-        }
-
         .column {
-            background-color: var(--col-bg); height: 60vh; min-height: 400px;
-            display: flex; flex-direction: column; transition: background-color 0.3s ease;
+            background-color: var(--col-bg); flex: 1; max-width: 600px; height: 720px;
+            border-radius: 30px; padding: 30px 20px; display: flex; flex-direction: column; transition: background-color 0.3s ease;
         }
+        
+        .column-header { 
+            color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; 
+            text-align: center; display: flex; justify-content: center; gap: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .count-badge { color: var(--header-sub); font-weight: 500; }
 
         .task-list { 
             width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none;
-            /* Фейд снизу */
-            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            padding-bottom: 30px;
         }
         .task-list::-webkit-scrollbar { display: none; }
 
         .card {
             flex-shrink: 0;
-            background-color: var(--card-bg); border: var(--card-border); color: var(--card-text); padding: 18px 25px;
-            border-radius: var(--card-radius); font-size: 16px; font-weight: 600; display: flex; align-items: center;
+            background-color: var(--card-bg); color: var(--card-text); padding: 16px 25px;
+            border-radius: 50px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
             position: relative; overflow: hidden; cursor: grab; transition: opacity 0.3s, transform 0.2s;
         }
-        .card.dragging { opacity: 0.5; transform: scale(0.95); }
-        .card.touch-drag { transform: scale(1.02); z-index: 100; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        
         .card-number { color: var(--sub-text); font-size: 13px; width: 35px; flex-shrink: 0; }
-        .card-title { flex-grow: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .card-title { flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
         
         .rating-wrapper { display: flex; align-items: center; gap: 2px; width: 100px; justify-content: flex-end; flex-shrink: 0; }
         .star-svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-        /* Кнопки управления */
+        /* Кнопки */
         .controls { display: flex; gap: 12px; width: 100%; max-width: 600px; margin-bottom: 40px; }
         .btn {
-            flex: 1; background-color: var(--card-bg); border: var(--card-border); padding: 18px 20px;
-            border-radius: var(--card-radius); font-size: 16px; font-weight: bold; color: var(--col-text);
-            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+            flex: 1; background-color: #FFFFFF; border: none; padding: 14px 20px;
+            border-radius: 50px; font-size: 16px; font-weight: bold; color: #121212;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s ease;
         }
-        .btn:hover { background-color: rgba(255,255,255,0.1); }
-        .btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .btn:hover { transform: translateY(-2px); }
 
         /* Модалки */
         .modal-overlay {
@@ -188,68 +137,113 @@
             opacity: 0; visibility: hidden; transition: all 0.3s;
         }
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
-        .modal-content { background-color: var(--card-bg); border: var(--card-border); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); backdrop-filter: blur(10px); }
-        .modal-content input { background: rgba(128,128,128,0.1); border: none; padding: 18px; border-radius: var(--card-radius); color: inherit; font-size: 16px; outline: none; user-select: text; }
+        .modal-content { background-color: var(--col-bg); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
 
         /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
         #trash-content::-webkit-scrollbar { display: none; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: var(--card-radius); }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
         
-        #trash-content .settings-row { margin-bottom: 8px; padding: 12px 25px; }
+        #trash-content .settings-row { 
+            border-radius: 50px; 
+            margin-bottom: 8px; 
+            padding: 10px 25px; 
+        }
 
         /* Остальное */
-        .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; border: none; }
+        .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; }
         .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
         .btn-hold.holding .fill { width: 100%; transition: width 0.8s linear; }
 
         #context-menu {
             position: fixed; background: #222; border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; border: 1px solid rgba(255,255,255,0.1);
         }
-        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; font-weight: 500; }
+        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; }
         .menu-item:hover { background: #333; }
-        
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--rating-green); }
+        input:checked + .slider { background-color: #4cd964; }
         input:checked + .slider:before { transform: translateX(24px); }
 
         /* ========================================= */
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { padding: 15px 10px 110px 10px; overflow-y: auto; }
-            .top-bar { margin-bottom: 20px; }
-            .search-wrapper.active { width: calc(100vw - 20px); position: absolute; right: 10px; z-index: 10; }
-            .greeting { font-size: 24px; transition: opacity 0.2s; }
-            .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
+            body { 
+                padding: 15px 10px 110px 10px; 
+                overflow-y: auto; 
+            }
+            .search-container { margin-bottom: 15px; }
+            .board { 
+                flex-direction: column; 
+                gap: 15px; 
+                margin-bottom: 0;
+            }
             
-            .board { flex-direction: column; gap: 15px; margin-bottom: 0; }
-            
-            .column-title { font-size: 20px; margin-bottom: 10px; cursor: pointer; }
-            .column { height: auto; min-height: unset; background: none; }
+            .column { 
+                height: auto; 
+                min-height: unset; 
+                max-height: unset;
+                padding: 20px 15px; 
+                border-radius: 25px;
+                transition: padding 0.3s ease;
+            }
+            .column-header { 
+                font-size: 20px; 
+                cursor: pointer; 
+                margin-bottom: 0; 
+            }
             
             .task-list {
-                max-height: 70vh; opacity: 1; margin-top: 5px; padding-bottom: 10px;
-                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+                max-height: 70vh; 
+                opacity: 1;
+                margin-top: 15px;
+                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
             }
 
-            .column-wrapper.mobile-closed .task-list {
-                max-height: 0; opacity: 0; overflow: hidden; padding-bottom: 0;
+            .column.mobile-closed {
+                padding: 15px; 
             }
-            .column-wrapper.mobile-closed .column-title { opacity: 0.6; }
+            .column.mobile-closed .task-list {
+                max-height: 0;
+                opacity: 0;
+                margin-top: 0;
+                overflow: hidden;
+            }
+            .column.mobile-closed .column-header {
+                opacity: 0.6; 
+            }
 
             .controls {
-                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
-                margin: 0; padding: 20px 15px 35px 15px; z-index: 1000; display: flex; gap: 10px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: var(--bg-color); 
+                margin: 0;
+                padding: 20px 15px 35px 15px; 
+                z-index: 1000;
+                box-shadow: 0 -15px 30px var(--bg-color); 
+                display: flex;
+                gap: 10px;
+                justify-content: space-between;
             }
-            .btn { padding: 16px 5px; font-size: 14px; }
-            .btn svg { display: none; } /* На мобилках иконки в кнопках убираем для экономии места */
+            html[data-theme="dark"] .controls {
+                box-shadow: 0 -15px 30px var(--bg-color);
+            }
+            .btn { 
+                padding: 14px 5px; 
+                font-size: 14px; 
+            }
             
             .modal-content { width: 95%; padding: 25px 20px; }
-            .card { padding: 14px 15px; }
+            .card { padding: 14px 15px; font-size: 14px; }
+            .rating-wrapper { width: 85px; }
+            .card-number { width: 25px; font-size: 12px; }
+            .settings-row { padding: 12px 20px; }
+            #trash-content .settings-row { padding: 10px 20px; }
         }
     </style>
 </head>
@@ -266,100 +260,90 @@
 
     <div id="toast" class="toast">Успешно!</div>
 
-    <div class="top-bar">
-        <div class="greeting">Привет, <span id="display-name">Гость</span></div>
-        <div class="search-wrapper" id="search-box">
-            <span class="search-label" id="search-label">Поиск</span>
-            <input type="text" id="global-search" class="search-input" placeholder="Название..." oninput="handleSearch()">
-            <button class="search-icon-btn" id="search-btn">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
-        </div>
+    <div class="search-container">
+        <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
     </div>
 
     <div class="board">
-        <div class="column-wrapper" id="wrap-watchlist">
-            <h2 class="column-title">Просмотреть <span class="count-badge">0</span></h2>
-            <div class="column" id="zone-watchlist"><div class="task-list"></div></div>
-        </div>
-        <div class="column-wrapper" id="wrap-watched">
-            <h2 class="column-title">Просмотрено <span class="count-badge">0</span></h2>
-            <div class="column" id="zone-watched"><div class="task-list"></div></div>
-        </div>
+        <div class="column" id="zone-watchlist"><h2 class="column-header">Просмотреть <span class="count-badge">0</span></h2><div class="task-list"></div></div>
+        <div class="column" id="zone-watched"><h2 class="column-header">Просмотрено <span class="count-badge">0</span></h2><div class="task-list"></div></div>
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="openModal('edit-modal')">
-            <svg><path d="M12 5v14M5 12h14"/></svg> Добавить
-        </button>
-        <button class="btn" onclick="openModal('trash-modal')">
-            <svg><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Корзина
-        </button>
-        <button class="btn" onclick="openModal('settings-modal')">
-            <svg><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Настройки
-        </button>
+        <button class="btn" onclick="openModal('edit-modal')">Добавить</button>
+        <button class="btn" onclick="openModal('trash-modal')">Корзина</button>
+        <button class="btn" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
+    <!-- Модалка Авторизации -->
     <div class="modal-overlay" id="auth-modal" style="background-color: rgba(0, 0, 0, 0.95);">
         <div class="modal-content" style="text-align: center; max-width: 400px; padding: 40px 30px;">
             <h2 style="margin-bottom: 15px;">Синхронизация</h2>
-            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый код.</p>
+            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый 5-значный код.</p>
 
-            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px; margin-bottom: 15px;">
+            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px; margin-bottom: 15px;">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Новый профиль</h4>
-                <input type="text" id="auth-name" placeholder="Ваше имя..." style="width: 100%; text-align: center; margin-bottom: 15px;">
+                <input type="text" id="auth-name" placeholder="Ваше имя..." class="search-input" style="margin-bottom: 15px; text-align: center;">
                 <button class="btn" style="width: 100%;" onclick="createNewProfile()">Создать профиль</button>
             </div>
 
-            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 25px;">
+            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px;">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть код?</h4>
-                <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" style="width: 100%; text-align: center; text-transform: uppercase; margin-bottom: 15px;">
+                <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" class="search-input" style="margin-bottom: 15px; text-align: center; text-transform: uppercase;">
                 <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
             </div>
+            
             <div id="auth-status" style="margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px;"></div>
         </div>
     </div>
 
+    <!-- Модалка с информацией о созданном коде -->
     <div class="modal-overlay" id="info-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-bottom:15px;">Ваш код доступа</h3>
-            <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его!</p>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его, чтобы не потерять список фильмов!</p>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
-                <input type="text" id="info-code-input" readonly style="width: 120px; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
+                <input type="text" id="info-code-input" readonly style="width: 120px; background: rgba(128,128,128,0.1); border: none; padding: 15px; border-radius: 15px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
                 <button class="btn" style="flex: unset; padding: 10px 20px;" onclick="copyInfoCode()">Копировать</button>
             </div>
-            <button class="btn" style="width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
+            <button class="btn" style="background:#DCDCDC; width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
         </div>
     </div>
 
+    <!-- Модалка подтверждения выхода (Исправлен z-index на 2500, чтобы перекрывать настройки) -->
     <div class="modal-overlay" id="logout-modal" onclick="closeOnOverlay(event)" style="z-index: 2500;">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-bottom:15px;">Выйти из профиля?</h3>
-            <p style="margin-bottom: 25px; font-size: 14px; color: var(--header-sub);">Убедитесь, что вы записали код.</p>
+            <p style="margin-bottom: 25px; font-size: 14px; color: var(--header-sub);">Убедитесь, что вы записали свой код. Иначе доступ к списку будет потерян.</p>
             <div style="display:flex; gap:10px;">
-                <button class="btn" onclick="closeModal('logout-modal')">Отмена</button>
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('logout-modal')">Отмена</button>
                 <button class="btn" style="background:var(--danger); color:white;" onclick="confirmLogout()">Выйти</button>
             </div>
         </div>
     </div>
 
+    <!-- Модалка Добавления -->
     <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
-            <input type="text" id="movie-input" style="margin-bottom:20px;" placeholder="Название..." onkeydown="if(event.key === 'Enter') saveMovie()">
+            <input type="text" id="movie-input" 
+                   style="background:rgba(128,128,128,0.1); border:none; padding:15px; border-radius:15px; color:inherit; margin-bottom:20px; outline:none; user-select: text;" 
+                   placeholder="Название..."
+                   onkeydown="if(event.key === 'Enter') saveMovie()">
             <div style="display:flex; gap:10px;">
-                <button class="btn" onclick="closeModal('edit-modal')">Отмена</button>
-                <button class="btn" style="background:var(--col-text); color:var(--bg-color);" onclick="saveMovie()">Сохранить</button>
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('edit-modal')">Отмена</button>
+                <button class="btn" onclick="saveMovie()">Сохранить</button>
             </div>
         </div>
     </div>
 
+    <!-- Модалка Корзины -->
     <div class="modal-overlay" id="trash-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
             <div id="trash-content"></div>
             <div style="display:flex; gap:10px;">
-                <button class="btn" onclick="closeModal('trash-modal')">Назад</button>
+                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('trash-modal')">Назад</button>
                 <button class="btn btn-hold" id="clear-btn">
                     <div class="fill" id="clear-fill"></div>
                     <span style="position: relative; z-index: 2;">Очистить всё</span>
@@ -368,20 +352,21 @@
         </div>
     </div>
 
+    <!-- Модалка Настроек -->
     <div class="modal-overlay" id="settings-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
             
-            <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: var(--card-radius); margin-bottom: 15px;">
+            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px;">
-                    <button class="btn" style="padding: 12px 20px; flex: unset;" onclick="copySettingsKey()">Копировать</button>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
+                    <button class="btn" style="padding: 12px 20px; flex: 0 0 auto; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
                 </div>
-                <button class="btn" style="width: 100%; background: var(--danger); border-color: var(--danger); color: white;" onclick="openModal('logout-modal')">Выйти из профиля</button>
+                <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
 
-            <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: var(--card-radius); margin-bottom: 15px;">
+            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Бекап</div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn" onclick="exportData()">Экспорт</button>
@@ -394,28 +379,31 @@
                 <span>Темная тема</span>
                 <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
             </div>
-            <button class="btn" onclick="closeModal('settings-modal')">Закрыть</button>
+            
+            <button class="btn" style="background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
+    <!-- Модалка Рейтинга -->
     <div class="modal-overlay" id="rating-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Установить рейтинг</h3>
             <div class="rating-picker" id="picker-container" style="display:flex; justify-content:center; gap:8px; margin-bottom:10px;"></div>
             <div id="rating-display" style="text-align:center; font-size:24px; font-weight:bold; margin-bottom:25px; color:var(--rating-green)">0.0</div>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:var(--danger); border-color:var(--danger); color:white;" onclick="removeRating()">Убрать</button>
-                <button class="btn" style="background:var(--col-text); color:var(--bg-color);" onclick="saveRating()">Готово</button>
+                <button class="btn" style="background:var(--danger); color:white;" onclick="removeRating()">Убрать</button>
+                <button class="btn" onclick="saveRating()">Готово</button>
             </div>
         </div>
     </div>
 
+    <!-- Контекстное меню -->
     <div id="context-menu">
         <div class="menu-item" onclick="editCurrent()">Редактировать</div>
         <div class="menu-item" onclick="openRating()">Рейтинг</div>
         <div class="menu-item" onclick="moveCurrent()">Переместить</div>
         <div class="menu-item" onclick="copyCurrent()">Копировать</div>
-        <div class="menu-item" style="color:var(--danger)" onclick="deleteCurrent()">В корзину</div>
+        <div class="menu-item" style="color:#ff4d4d" onclick="deleteCurrent()">В корзину</div>
     </div>
 
     <script>
@@ -432,30 +420,21 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // --- ПОИСК В ШАПКЕ ---
-        const searchBox = document.getElementById('search-box');
-        const searchInput = document.getElementById('global-search');
-        document.getElementById('search-btn').addEventListener('click', () => {
-            searchBox.classList.toggle('active');
-            if(searchBox.classList.contains('active')) searchInput.focus();
-            else { searchInput.value = ''; handleSearch(); }
-        });
-
         // --- АВТОРИЗАЦИЯ И СИНХРОНИЗАЦИЯ ---
+
         function generateShortCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
-            for (let i = 0; i < 5; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < 5; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
             return result;
         }
 
         function showAuthStatus(msg, isError = false) {
             const el = document.getElementById('auth-status');
-            el.textContent = msg; el.style.color = isError ? 'var(--danger)' : 'var(--rating-green)';
-        }
-
-        function setDisplayName(name) {
-            document.getElementById('display-name').textContent = name || 'Гость';
+            el.textContent = msg;
+            el.style.color = isError ? 'var(--danger)' : 'var(--rating-green)';
         }
 
         async function createNewProfile() {
@@ -466,17 +445,20 @@
             const code = generateShortCode();
             localStorage.setItem('syncKey', code);
             localStorage.setItem('syncName', cleanName);
-            setDisplayName(cleanName);
             
             document.getElementById('auth-modal').classList.remove('is-open');
+            
             document.getElementById('info-code-input').value = code;
             openModal('info-modal');
+            
             refreshUI(true); 
         }
 
         function copyInfoCode() {
             const input = document.getElementById('info-code-input');
-            input.select(); navigator.clipboard.writeText(input.value); showToast('Код скопирован!');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            showToast('Код скопирован!');
         }
 
         async function loginWithKey() {
@@ -484,6 +466,7 @@
             if (!key || key.length !== 5) return showAuthStatus('Введите корректный 5-значный код', true);
 
             showAuthStatus('Ищем профиль в облаке...');
+            
             try {
                 const res = await fetch(`/api/load?key=${key}`);
                 if (res.status === 404) return showAuthStatus('Профиль не найден. Проверьте код.', true);
@@ -491,9 +474,7 @@
                 
                 const cloudData = await res.json();
                 localStorage.setItem('syncKey', key);
-                const uName = cloudData.userName || 'User';
-                localStorage.setItem('syncName', uName);
-                setDisplayName(uName);
+                localStorage.setItem('syncName', cloudData.userName || 'User');
                 localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
                 localStorage.setItem('deletedMovies', JSON.stringify(cloudData.deletedMovies || []));
                 
@@ -508,9 +489,11 @@
             const key = localStorage.getItem('syncKey');
             const userName = localStorage.getItem('syncName') || 'User';
             if (!key) return; 
+
             try {
                 await fetch('/api/save', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key, userName, boardData, deletedMovies: deletedList })
                 });
             } catch (e) { console.error('Сбой фонового сохранения в облако', e); }
@@ -518,74 +501,29 @@
 
         function copySettingsKey() {
             const key = document.getElementById('settings-sync-key').value;
-            if (key) { navigator.clipboard.writeText(key); showToast('Код скопирован!'); }
+            if (key) {
+                navigator.clipboard.writeText(key);
+                showToast('Код скопирован!');
+            }
         }
 
         function confirmLogout() {
-            localStorage.clear(); location.reload();
+            localStorage.clear();
+            location.reload();
         }
 
         // --- ИНТЕРФЕЙС И ЛОГИКА ---
+
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>${getStarsHTML(rating)}`;
             
-            // На ПК - обычный drag&drop
             card.addEventListener('mousedown', onDragStart);
             
-            // На мобилках - зажатие (touch) для перемещения и быстрый клик для меню
-            let touchTimer;
-            let isTouchDragging = false;
-            let initialY;
-
-            card.addEventListener('touchstart', (e) => {
-                if (window.innerWidth > 768) return;
-                initialY = e.touches[0].clientY;
-                touchTimer = setTimeout(() => {
-                    isTouchDragging = true;
-                    if(navigator.vibrate) navigator.vibrate(50);
-                    card.classList.add('touch-drag');
-                }, 800); // 800ms для зажатия
-            }, {passive: true});
-
-            card.addEventListener('touchmove', (e) => {
-                if (window.innerWidth > 768) return;
-                if (!isTouchDragging) {
-                    if (Math.abs(e.touches[0].clientY - initialY) > 10) clearTimeout(touchTimer); // отмена при скролле
-                    return;
-                }
-                e.preventDefault(); // блокируем скролл во время перетаскивания
-                const touch = e.touches[0];
-                const list = card.parentElement;
-                
-                // Находим элемент, над которым сейчас палец
-                const siblings = [...list.querySelectorAll('.card:not(.touch-drag)')];
-                const nextSibling = siblings.find(sibling => {
-                    return touch.clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2;
-                });
-                
-                if (nextSibling) list.insertBefore(card, nextSibling);
-                else list.appendChild(card);
-                
-            }, {passive: false});
-
-            card.addEventListener('touchend', (e) => {
-                if (window.innerWidth > 768) return;
-                clearTimeout(touchTimer);
-                if (isTouchDragging) {
-                    card.classList.remove('touch-drag');
-                    isTouchDragging = false;
-                    refreshUI(true);
-                } else if (Math.abs(e.changedTouches[0].clientY - initialY) < 10 && !e.target.closest('.rating-wrapper')) {
-                    // Это был обычный тап
-                    showContextMenu(e.changedTouches[0], card);
-                }
-            });
-
-            // На ПК - клик для контекстного меню
             card.addEventListener('click', function(e) {
-                if (window.innerWidth > 768 && !e.target.closest('.rating-wrapper')) {
+                if (window.innerWidth <= 768) {
+                    if (e.target.closest('.rating-wrapper')) return; 
                     showContextMenu(e, card);
                 }
             });
@@ -598,7 +536,8 @@
             if (val) {
                 if (contextTarget) contextTarget.querySelector('.card-title').textContent = val;
                 else document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
-                closeModal('edit-modal'); refreshUI(true);
+                closeModal('edit-modal');
+                refreshUI(true);
             }
         }
 
@@ -637,9 +576,11 @@
 
         // --- РЕЙТИНГ ---
         function initPicker() {
-            const container = document.getElementById('picker-container'); container.innerHTML = '';
+            const container = document.getElementById('picker-container');
+            container.innerHTML = '';
             for (let i = 1; i <= 5; i++) {
-                const unit = document.createElement('div'); unit.style.cssText = "position:relative; width:42px; height:42px; cursor:pointer;";
+                const unit = document.createElement('div');
+                unit.style.cssText = "position:relative; width:42px; height:42px; cursor:pointer;";
                 unit.innerHTML = `<div style="position:absolute;top:0;left:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i-0.5})" onclick="selectRating(${i-0.5})"></div>
                     <div style="position:absolute;top:0;right:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i})" onclick="selectRating(${i})"></div>
                     <svg viewBox="0 0 32 32" style="width:100%;height:100%"><path d="${starPath}" fill="var(--rating-gray)"/></svg>`;
@@ -660,7 +601,8 @@
             document.getElementById('rating-display').textContent = val.toFixed(1);
         }
         function getStarsHTML(rating) {
-            const num = parseFloat(rating) || 0; let html = '<div class="rating-wrapper">';
+            const num = parseFloat(rating) || 0;
+            let html = '<div class="rating-wrapper">';
             for (let i = 1; i <= 5; i++) {
                 let fill = (num >= i) ? "var(--rating-green)" : (num > i - 1 ? "url(#half-star-grad)" : "var(--rating-gray)");
                 html += `<svg class="star-svg" viewBox="0 0 32 32"><path d="${starPath}" fill="${fill}"/></svg>`;
@@ -671,9 +613,10 @@
         function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(true); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
         
-        // --- DRAG & DROP (ПК) ---
+        // --- DRAG & DROP (РАБОТАЕТ ТОЛЬКО НА ПК) ---
         function onDragStart(e) {
             if (window.innerWidth <= 768 || e.which !== 1) return;
+            
             const card = e.target.closest('.card'); if (!card) return;
             if (e.target.closest('.rating-wrapper')) return;
 
@@ -704,13 +647,17 @@
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
         // --- УМНОЕ КОНТЕКСТНОЕ МЕНЮ ---
-        function showContextMenu(evtData, card) {
+        function showContextMenu(e, card) {
+            e.preventDefault(); 
             contextTarget = card; 
             const menu = document.getElementById('context-menu'); 
             menu.style.display = 'block'; 
             
-            const menuWidth = 200; const menuHeight = 220; 
-            let safeX = evtData.clientX; let safeY = evtData.clientY;
+            const menuWidth = 200;
+            const menuHeight = 220; 
+            
+            let safeX = e.clientX;
+            let safeY = e.clientY;
 
             if (safeX + menuWidth > window.innerWidth) safeX = window.innerWidth - menuWidth - 10;
             if (safeY + menuHeight > window.innerHeight) safeY = window.innerHeight - menuHeight - 10;
@@ -721,7 +668,7 @@
 
         document.addEventListener('contextmenu', e => {
             const card = e.target.closest('.card');
-            if (card) { e.preventDefault(); showContextMenu(e, card); }
+            if (card) showContextMenu(e, card);
         });
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
         
@@ -729,7 +676,9 @@
             if (!contextTarget) return;
             const currentZoneId = contextTarget.closest('.column').id;
             const targetZoneId = currentZoneId === 'zone-watchlist' ? 'zone-watched' : 'zone-watchlist';
-            document.getElementById(targetZoneId).querySelector('.task-list').prepend(contextTarget); 
+            
+            const targetList = document.getElementById(targetZoneId).querySelector('.task-list');
+            targetList.prepend(contextTarget); 
             refreshUI(true);
         }
 
@@ -743,7 +692,7 @@
             const q = document.getElementById('global-search').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
                 const title = c.querySelector('.card-title').textContent.toLowerCase();
-                c.style.display = (!q || title.includes(q)) ? "flex" : "none";
+                c.style.opacity = (!q || title.includes(q)) ? "1" : "0.1";
             });
         }
         
@@ -755,11 +704,13 @@
         function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
         
         // --- ФУНКЦИИ РЕНДЕРА И ИНИЦИАЛИЗАЦИИ ---
+
         function loadBoardFromStorage() {
             const saved = JSON.parse(localStorage.getItem('boardData'));
             if (saved) {
                 document.getElementById('zone-watchlist').querySelector('.task-list').innerHTML = '';
                 document.getElementById('zone-watched').querySelector('.task-list').innerHTML = '';
+                
                 Object.keys(saved).forEach(z => {
                     const list = document.getElementById(z)?.querySelector('.task-list');
                     if(list) saved[z].forEach(obj => list.appendChild(createCard(obj.title, obj.rating)));
@@ -771,9 +722,8 @@
         function refreshUI(pushToCloudFlag = true) {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
-                const wrapper = col.closest('.column-wrapper');
-                const cards = col.querySelectorAll('.card:not(.dragging):not(.touch-drag)');
-                if(wrapper) wrapper.querySelector('.count-badge').textContent = cards.length;
+                const cards = col.querySelectorAll('.card:not(.dragging)');
+                col.querySelector('.count-badge').textContent = cards.length;
                 cards.forEach((c, i) => c.querySelector('.card-number').textContent = i + 1);
                 data[col.id] = Array.from(cards).map(t => ({ title: t.querySelector('.card-title').textContent, rating: t.querySelector('.raw-rating')?.textContent || "0" }));
             });
@@ -793,25 +743,30 @@
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('theme-checkbox').checked = (theme === 'dark');
             
-            // Логика Мобильных Колонок (Аккордеон)
-            document.querySelectorAll('.column-title').forEach(header => {
+            document.querySelectorAll('.column-header').forEach(header => {
                 header.addEventListener('click', function() {
                     if (window.innerWidth > 768) return; 
-                    const parentWrap = this.closest('.column-wrapper');
-                    const isAlreadyClosed = parentWrap.classList.contains('mobile-closed');
                     
-                    document.querySelectorAll('.column-wrapper').forEach(w => w.classList.add('mobile-closed'));
-                    if (isAlreadyClosed) parentWrap.classList.remove('mobile-closed');
+                    const parentCol = this.closest('.column');
+                    const isAlreadyClosed = parentCol.classList.contains('mobile-closed');
+                    
+                    document.querySelectorAll('.column').forEach(col => col.classList.add('mobile-closed'));
+                    
+                    if (isAlreadyClosed) {
+                        parentCol.classList.remove('mobile-closed');
+                    }
                 });
             });
 
-            if (window.innerWidth <= 768) document.getElementById('wrap-watched').classList.add('mobile-closed');
+            if (window.innerWidth <= 768) {
+                document.getElementById('zone-watched').classList.add('mobile-closed');
+            }
 
             const key = localStorage.getItem('syncKey');
-            const name = localStorage.getItem('syncName');
-            setDisplayName(name);
-
-            if (!key) { document.getElementById('auth-modal').classList.add('is-open'); return; }
+            if (!key) {
+                document.getElementById('auth-modal').classList.add('is-open');
+                return; 
+            }
 
             loadBoardFromStorage();
 
@@ -824,7 +779,9 @@
                     localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
                     loadBoardFromStorage();
                 }
-            } catch (e) { console.log('Работаем локально, нет сети.'); }
+            } catch (e) {
+                console.log('Работаем локально, нет сети.');
+            }
         };
     </script>
 </body>
