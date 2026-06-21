@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To Do Watch</title>
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
     <style>
         /* Локальные шрифты */
         @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
@@ -33,18 +27,6 @@
             --danger: #ff4d4d;
         }
 
-        html[data-theme="light"] {
-            --bg-color: #E8E8E8;
-            --col-text: #121212;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --card-border: 1px solid rgba(0, 0, 0, 0.05);
-            --card-text: #121212;
-            --sub-text: rgba(0, 0, 0, 0.4);
-            --header-sub: rgba(0, 0, 0, 0.5);
-            --rating-green: #28a745;
-            --rating-gray: rgba(128, 128, 128, 0.25);
-        }
-
         * {
             box-sizing: border-box; margin: 0; padding: 0;
             font-family: 'Gilroy', sans-serif;
@@ -54,22 +36,17 @@
         body {
             background-color: var(--bg-color); color: var(--col-text);
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; padding: 40px 20px; overflow: hidden;
-            transition: background-color 0.3s ease;
+            min-height: 100vh; padding: 40px 20px 0 20px; overflow: hidden;
         }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
         /* Шапка с приветствием, поиском и кнопками */
         .top-bar {
             width: 100%; max-width: 1240px; display: flex; 
-            justify-content: space-between; align-items: center; margin-bottom: 30px; height: 50px;
+            justify-content: space-between; align-items: center; 
+            margin-bottom: 60px; height: 60px;
         }
         .greeting {
-            font-size: 32px; font-weight: 800; color: var(--col-text);
+            font-size: 50px; font-weight: 700; color: var(--col-text);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .greeting span { color: var(--rating-green); }
@@ -117,10 +94,9 @@
         .toast.show { opacity: 1; visibility: visible; top: 40px; }
 
         /* Доска */
-        .board { display: flex; gap: 30px; width: 100%; max-width: 1240px; margin-bottom: 30px; justify-content: center; align-items: flex-start; }
+        .board { display: flex; gap: 30px; width: 100%; max-width: 1240px; margin-bottom: 0; justify-content: center; align-items: flex-start; }
         .column-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* Вынесенные заголовки */
         .column-title {
             color: var(--col-text); font-size: 24px; font-weight: 700; 
             display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding-left: 5px;
@@ -132,18 +108,22 @@
 
         .column {
             background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
-            height: 65vh; min-height: 400px; display: flex; flex-direction: column; 
+            height: 60vh; min-height: 400px; display: flex; flex-direction: column; 
             padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
 
         .task-list { 
             width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
-            /* Фейд эффект внизу списка */
             mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            padding-bottom: 30px;
+            padding-bottom: 40px;
+            /* Полностью убираем скроллбары */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
         }
+        .task-list::-webkit-scrollbar { display: none; }
 
+        /* Карточки */
         .card {
             flex-shrink: 0;
             background-color: rgba(255,255,255,0.03); border: var(--card-border); color: var(--card-text); padding: 18px 25px;
@@ -151,8 +131,13 @@
             position: relative; overflow: hidden; cursor: grab; transition: background 0.2s, opacity 0.3s, transform 0.2s;
         }
         .card:hover { background-color: rgba(255,255,255,0.06); }
-        .card.dragging { opacity: 0.5; transform: scale(0.95); }
-        .card.touch-drag { transform: scale(1.02); z-index: 100; box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: var(--rating-green); }
+        
+        /* Блюр и прозрачность при перетаскивании */
+        .card.dragging, .card.touch-drag { 
+            opacity: 0.9; transform: scale(0.95); background-color: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-color: var(--rating-green); z-index: 100;
+        }
+        .card.touch-drag { transform: scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.6); }
         
         .card-number { color: var(--sub-text); font-size: 13px; width: 35px; flex-shrink: 0; }
         .card-title { flex-grow: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
@@ -173,13 +158,13 @@
         .modal-content input:focus { border-color: var(--rating-green); }
         
         .btn-modal {
-            background-color: var(--card-bg); border: var(--card-border); padding: 18px 20px;
+            background-color: #27272a; border: var(--card-border); padding: 18px 20px;
             border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text); cursor: pointer;
             flex: 1; transition: all 0.2s;
         }
-        .btn-modal:hover { background-color: rgba(255,255,255,0.1); }
+        .btn-modal:hover { background-color: #3f3f46; }
         .btn-primary { background-color: var(--rating-green); color: #000; border: none; }
-        .btn-primary:hover { background-color: #0ea5e9; opacity: 0.9; }
+        .btn-primary:hover { background-color: var(--rating-green); opacity: 0.8; }
 
         /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
@@ -197,24 +182,17 @@
         }
         .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; font-weight: 500; }
         .menu-item:hover { background: #333; }
-        
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--rating-green); }
-        input:checked + .slider:before { transform: translateX(24px); }
 
         /* ========================================= */
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { padding: 15px 10px; overflow-y: auto; }
-            .top-bar { margin-bottom: 20px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
-            .greeting { font-size: 28px; transition: opacity 0.2s; width: 100%; text-align: center; }
+            body { padding: 15px 20px 110px 20px; overflow-y: auto; } /* Добавлен воздух по бокам (20px) */
+            .top-bar { margin-bottom: 40px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
+            .greeting { font-size: 32px; transition: opacity 0.2s; width: 100%; text-align: center; }
             .header-controls { width: 100%; justify-content: center; }
             
-            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 60px; z-index: 10; }
+            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 65px; z-index: 10; }
             .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
             
             .board { flex-direction: column; gap: 20px; }
@@ -231,8 +209,23 @@
             .column-wrapper.mobile-closed .column { padding: 0; border: none; background: transparent; }
             .column-wrapper.mobile-closed .column-title { opacity: 0.6; }
             
-            .modal-content { width: 95%; padding: 25px 20px; }
+            .modal-content { width: 100%; padding: 25px 20px; }
             .card { padding: 14px 15px; }
+            
+            /* Плавающие кнопки управления внизу экрана */
+            .mobile-bottom-controls {
+                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
+                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 10px; justify-content: space-between;
+                box-shadow: 0 -15px 30px var(--bg-color);
+            }
+            .mobile-bottom-controls .btn-modal { padding: 14px 5px; font-size: 14px; text-align: center; }
+        }
+        
+        /* Скрываем нижние кнопки на ПК, показываем верхние на ПК */
+        .mobile-bottom-controls { display: none; }
+        @media (max-width: 768px) {
+            .header-controls .icon-btn:not(#search-box) { display: none; } /* Скрыть корзину и настройки сверху */
+            .mobile-bottom-controls { display: flex; }
         }
     </style>
 </head>
@@ -268,6 +261,12 @@
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
             </button>
         </div>
+    </div>
+
+    <div class="mobile-bottom-controls">
+        <button class="btn-modal" onclick="openModal('edit-modal')">Добавить</button>
+        <button class="btn-modal" onclick="openModal('trash-modal')">Корзина</button>
+        <button class="btn-modal" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
     <div class="board">
@@ -370,11 +369,7 @@
                 </div>
                 <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
             </div>
-
-            <div class="settings-row" style="margin-bottom:20px;">
-                <span>Темная тема</span>
-                <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
-            </div>
+            
             <button class="btn-modal" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
@@ -515,28 +510,38 @@
             // ПК drag&drop
             card.addEventListener('mousedown', onDragStart);
             
-            // Мобилки - зажатие для перемещения
+            // Мобилки - умное разделение тапа и перетаскивания
             let touchTimer;
             let isTouchDragging = false;
+            let hasMoved = false;
             let initialY;
 
             card.addEventListener('touchstart', (e) => {
                 if (window.innerWidth > 768) return;
                 initialY = e.touches[0].clientY;
+                hasMoved = false;
+                isTouchDragging = false;
+                
                 touchTimer = setTimeout(() => {
                     isTouchDragging = true;
                     if(navigator.vibrate) navigator.vibrate(50);
                     card.classList.add('touch-drag');
-                }, 800);
+                }, 500); // 0.5 секунды для активации драг-н-дропа
             }, {passive: true});
 
             card.addEventListener('touchmove', (e) => {
                 if (window.innerWidth > 768) return;
+                
+                if (Math.abs(e.touches[0].clientY - initialY) > 10) {
+                    hasMoved = true;
+                }
+                
                 if (!isTouchDragging) {
-                    if (Math.abs(e.touches[0].clientY - initialY) > 10) clearTimeout(touchTimer);
+                    if (hasMoved) clearTimeout(touchTimer); // Отменяем драг, если это просто скролл страницы
                     return;
                 }
-                e.preventDefault();
+                
+                e.preventDefault(); // Блокируем скролл во время перетаскивания
                 const touch = e.touches[0];
                 const list = card.parentElement;
                 
@@ -550,11 +555,14 @@
             card.addEventListener('touchend', (e) => {
                 if (window.innerWidth > 768) return;
                 clearTimeout(touchTimer);
+                
                 if (isTouchDragging) {
+                    // Закончили перетаскивать - меню НЕ открываем
                     card.classList.remove('touch-drag');
                     isTouchDragging = false;
                     refreshUI(true);
-                } else if (Math.abs(e.changedTouches[0].clientY - initialY) < 10 && !e.target.closest('.rating-wrapper')) {
+                } else if (!hasMoved && !e.target.closest('.rating-wrapper')) {
+                    // Был обычный тап (не скролл и не долгое нажатие) - Открываем меню
                     showContextMenu(e.changedTouches[0], card);
                 }
             });
@@ -575,7 +583,6 @@
                 if (contextTarget) {
                     contextTarget.querySelector('.card-title').textContent = val;
                 } else {
-                    // Принудительно кидаем в "Хочу посмотреть"
                     document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
                 }
                 closeModal('edit-modal');
@@ -661,7 +668,7 @@
             dragItem = card; const rect = dragItem.getBoundingClientRect();
             shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
             avatar = dragItem.cloneNode(true); avatar.classList.add('drag-avatar');
-            avatar.style.cssText = `position:fixed; pointer-events:none; z-index:9999; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px;`;
+            avatar.style.cssText = `position:fixed; pointer-events:none; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px; background-color: rgba(24, 24, 27, 0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index:9999; border: 1px solid var(--rating-green);`;
             document.body.appendChild(avatar); dragItem.classList.add('dragging');
             updateAvatarPos(e.clientX, e.clientY);
             document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
@@ -718,7 +725,6 @@
         function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(true); }
         function copyCurrent() { if (contextTarget) { navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); showToast('Название скопировано!'); } }
         function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(true); }
-        function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
         
         function handleSearch() {
             const q = document.getElementById('global-search').value.toLowerCase();
@@ -732,7 +738,7 @@
         clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); showToast('Корзина очищена'); }, 800); });
         clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
         
-        // --- Фикс восстановления бекапа (Сразу пушим в Vercel перед перезагрузкой) ---
+        // --- Восстановление бекапа ---
         function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); showToast('Бекап скачан'); }
         
         function importData(e) { 
@@ -743,7 +749,6 @@
                 localStorage.setItem('boardData', JSON.stringify(data.boardData)); 
                 localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); 
                 
-                // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: Сразу пушим в облако, чтобы после перезагрузки данные не стерлись
                 await pushToCloud(data.boardData, data.deletedMovies);
                 
                 showToast('Успешно восстановлено!');
@@ -787,11 +792,8 @@
 
         window.onload = async () => {
             initPicker();
-            const theme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
-            document.getElementById('theme-checkbox').checked = (theme === 'dark');
             
-            // Логика Мобильных Колонок (Аккордеон)
+            // Мобильные аккордеоны
             document.querySelectorAll('.column-title').forEach(header => {
                 header.addEventListener('click', function() {
                     if (window.innerWidth > 768) return; 
