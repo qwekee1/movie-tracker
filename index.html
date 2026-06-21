@@ -44,7 +44,7 @@
             min-height: 100vh; padding: 40px 20px 0 20px; overflow: hidden;
         }
 
-        /* Убираем скроллбары везде */
+        /* Убираем скроллбары */
         ::-webkit-scrollbar { width: 0px; display: none; }
         * { scrollbar-width: none; -ms-overflow-style: none; }
 
@@ -52,7 +52,7 @@
         .top-bar {
             width: 100%; max-width: 1240px; display: flex; 
             justify-content: space-between; align-items: center; 
-            margin-bottom: 40px; height: 60px;
+            margin-bottom: 80px; height: 60px;
         }
         .greeting {
             font-size: 50px; font-weight: 700; color: var(--col-text);
@@ -64,7 +64,7 @@
             display: flex; gap: 12px; align-items: center;
         }
 
-        /* Поиск */
+        /* Поиск на ПК */
         .search-wrapper {
             position: relative; height: 50px; width: 50px; 
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
@@ -84,7 +84,7 @@
             display: flex; align-items: center; justify-content: center; z-index: 2;
         }
 
-        /* Кнопки-иконки в шапке */
+        /* Кнопки-иконки в шапке (ПК) */
         .icon-btn {
             width: 50px; height: 50px; border-radius: var(--card-radius);
             background-color: var(--card-bg); border: var(--card-border);
@@ -117,7 +117,7 @@
 
         .column {
             background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
-            height: calc(100vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
+            height: calc(90vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
             padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
 
@@ -137,12 +137,12 @@
         }
         .card:hover { background-color: rgba(255,255,255,0.06); }
         
-        /* Плейсхолдер (оригинальная карточка, которая остается в списке при переносе) */
+        /* Плейсхолдер при переносе */
         .card.dragging { 
             opacity: 0.4; border: 2px dashed var(--rating-green); background: transparent; transform: scale(0.98);
         }
 
-        /* Аватарка (карточка, которая летает за мышкой/пальцем) */
+        /* Аватарка (Клон карточки при перетаскивании - сильное мыло) */
         .drag-avatar {
             position: fixed; pointer-events: none; z-index: 9999;
             background-color: rgba(24, 24, 27, 0.2) !important;
@@ -178,22 +178,22 @@
         .btn-primary { background-color: var(--rating-green); color: #000; border: none; }
         .btn-primary:hover { background-color: var(--rating-green); opacity: 0.8; }
 
-        /* Настройки (Специальные цвета) */
-        #settings-modal .modal-content { background-color: #18181b; }
+        /* Настройки (Новая палитра с жесткой обводкой) */
+        #settings-modal .modal-content, #trash-modal .modal-content { background-color: #18181b; }
         .settings-block {
-            background: transparent; border: none;
-            padding: 10px 0; margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px; border-radius: 20px; margin-bottom: 20px;
         }
         .btn-settings {
-            background-color: #27272a; border: var(--card-border);
-            padding: 18px 20px; border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text);
-            cursor: pointer; transition: all 0.2s; flex: 1;
+            background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 20px; border-radius: 12px; font-size: 16px; font-weight: bold; color: var(--col-text);
+            cursor: pointer; transition: all 0.2s; flex: 1; width: 100%;
         }
-        .btn-settings:hover { background-color: #3f3f46; }
+        .btn-settings:hover { background-color: rgba(255, 255, 255, 0.1); }
 
         /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; background: #27272a; padding: 15px 25px; border-radius: 16px; border: var(--card-border); margin-bottom: 8px; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px 25px; border-radius: 16px; margin-bottom: 8px; }
 
         .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; border: none; }
         .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
@@ -209,14 +209,15 @@
         /* ========================================= */
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
+        .mobile-bottom-controls { display: none; }
+
         @media (max-width: 768px) {
             body { padding: 30px 15px 100px 15px; overflow-y: auto; }
-            .top-bar { margin-bottom: 70px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
-            .greeting { font-size: 36px; transition: opacity 0.2s; width: 100%; text-align: center; }
-            .header-controls { width: 100%; justify-content: center; }
+            .top-bar { margin-bottom: 40px; flex-wrap: wrap; height: auto; justify-content: center; }
+            .greeting { font-size: 36px; width: 100%; text-align: center; }
             
-            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 75px; z-index: 10; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-            .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
+            /* Скрываем ПК кнопки */
+            .header-controls { display: none; }
             
             .board { flex-direction: column; gap: 20px; }
             .column-wrapper { width: 100%; }
@@ -235,20 +236,37 @@
             .modal-content { width: 95%; padding: 25px 20px; }
             .card { padding: 14px 15px; }
             
-            /* Плавающие кнопки управления внизу экрана */
+            /* Фиксированные нижние 4 кнопки (иконки без текста) */
             .mobile-bottom-controls {
-                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
-                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 10px; justify-content: space-between;
-                box-shadow: 0 -15px 30px var(--bg-color);
+                position: fixed; bottom: 0; left: 0; width: 100%; background: #09090b; 
+                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 12px; justify-content: space-between;
+                box-shadow: 0 -15px 30px #09090b; border-top: 1px solid rgba(255,255,255,0.05);
             }
-            .mobile-bottom-controls .btn-modal { padding: 14px 5px; font-size: 14px; text-align: center; background: #18181b; }
-        }
-        
-        /* Скрываем нижние кнопки на ПК, показываем верхние на ПК */
-        .mobile-bottom-controls { display: none; }
-        @media (max-width: 768px) {
-            .header-controls .icon-btn:not(#search-box) { display: none; } /* Скрыть корзину и настройки сверху */
-            .mobile-bottom-controls { display: flex; }
+            .icon-btn-mob { 
+                flex: 1; height: 55px; border-radius: var(--card-radius); background: #18181b;
+                border: 1px solid rgba(255,255,255,0.08); color: var(--col-text); display: flex; 
+                align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+            }
+            .icon-btn-mob:active { background: #27272a; }
+
+            /* Всплывающий поиск снизу */
+            .mobile-search-overlay {
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: #09090b; display: flex; align-items: center; padding: 0 20px;
+                gap: 10px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+                opacity: 0; pointer-events: none; z-index: 5;
+            }
+            .mobile-search-overlay.active {
+                transform: translateY(0); opacity: 1; pointer-events: auto;
+            }
+            .mobile-search-input {
+                flex: 1; background: #18181b; border: 1px solid rgba(255,255,255,0.08);
+                padding: 0 20px; height: 50px; border-radius: 15px; color: white; font-size: 16px; outline: none;
+            }
+            .mobile-search-close {
+                background: none; border: none; color: white; font-size: 20px; width: 50px; height: 50px; 
+                display: flex; align-items: center; justify-content: center; cursor: pointer;
+            }
         }
     </style>
 </head>
@@ -269,7 +287,7 @@
         <div class="greeting">Привет, <span id="display-name">Гость</span></div>
         <div class="header-controls">
             <div class="search-wrapper" id="search-box">
-                <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
+                <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch(this.value)">
                 <button class="search-icon-btn" id="search-btn">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
@@ -287,9 +305,22 @@
     </div>
 
     <div class="mobile-bottom-controls">
-        <button class="btn-modal" onclick="openModal('edit-modal')">Добавить</button>
-        <button class="btn-modal" onclick="openModal('trash-modal')">Корзина</button>
-        <button class="btn-modal" onclick="openModal('settings-modal')">Настройки</button>
+        <button class="icon-btn-mob" onclick="toggleMobileSearch()">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('edit-modal')">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('trash-modal')">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('settings-modal')">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+        </button>
+        <div class="mobile-search-overlay" id="mobile-search-overlay">
+            <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="Поиск по фильмам..." oninput="handleSearch(this.value)">
+            <button class="mobile-search-close" onclick="toggleMobileSearch()">✕</button>
+        </div>
     </div>
 
     <div class="board">
@@ -378,8 +409,8 @@
             <div class="settings-block">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px; background: rgba(255,255,255,0.02); border: none;">
-                    <button class="btn-settings" style="flex: unset;" onclick="copySettingsKey()">Копировать</button>
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px; background: rgba(255,255,255,0.02); border: none; color: white;">
+                    <button class="btn-settings" style="flex: unset; padding: 15px 20px;" onclick="copySettingsKey()">Копировать</button>
                 </div>
                 <button class="btn-settings" style="width: 100%; border-color: rgba(239, 68, 68, 0.2); color: var(--danger);" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
@@ -431,15 +462,40 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // Поиск в шапке (без авто-фокуса)
+        // Поиск на ПК
         const searchBox = document.getElementById('search-box');
         const searchInput = document.getElementById('global-search');
         document.getElementById('search-btn').addEventListener('click', () => {
             searchBox.classList.toggle('active');
-            if(!searchBox.classList.contains('active')) {
-                searchInput.value = ''; handleSearch(); 
-            }
+            if(searchBox.classList.contains('active')) searchInput.focus();
+            else { searchInput.value = ''; handleSearch(); }
         });
+
+        // Поиск на мобилке
+        function toggleMobileSearch() {
+            const overlay = document.getElementById('mobile-search-overlay');
+            overlay.classList.toggle('active');
+            if (!overlay.classList.contains('active')) {
+                document.getElementById('mobile-search-input').value = '';
+                handleSearch();
+            }
+            // Убрали авто-фокус по просьбе (будет открываться клава только при нажатии на инпут вручную)
+        }
+
+        // Общая фильтрация
+        function handleSearch(val) {
+            let q = val;
+            if (q === undefined) {
+                q = window.innerWidth <= 768 
+                    ? document.getElementById('mobile-search-input').value 
+                    : document.getElementById('global-search').value;
+            }
+            q = q.toLowerCase();
+            document.querySelectorAll('.card').forEach(c => {
+                const title = c.querySelector('.card-title').textContent.toLowerCase();
+                c.style.display = (!q || title.includes(q)) ? "flex" : "none";
+            });
+        }
 
         // Авторизация и Синхронизация
         function generateShortCode() {
@@ -525,19 +581,24 @@
             localStorage.clear(); location.reload();
         }
 
-        // Интерфейс и Логика
+        // Интерфейс и Логика карточек
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>${getStarsHTML(rating)}`;
             
-            // ПК drag&drop
+            // --- ПК УПРАВЛЕНИЕ ---
             card.addEventListener('mousedown', onDragStart);
             
-            // Блокируем системное меню
-            card.addEventListener('contextmenu', e => { e.preventDefault(); });
+            // Контекстное меню ПК (только Правый Клик)
+            card.addEventListener('contextmenu', e => { 
+                if (window.innerWidth > 768) {
+                    e.preventDefault(); 
+                    showContextMenu(e, card);
+                } 
+            });
             
-            // Мобилки - строгое разделение перетаскивания и тапа
+            // --- СМАРТФОНЫ (Тап = Меню, Зажатие = Drag) ---
             let touchTimer;
             let isTouchDragging = false;
             let hasMoved = false;
@@ -550,23 +611,27 @@
                 hasMoved = false;
                 isTouchDragging = false;
                 
+                // Таймер для активации перетаскивания (ровно 1 секунда)
                 touchTimer = setTimeout(() => {
-                    isTouchDragging = true;
-                    if(navigator.vibrate) navigator.vibrate(50);
-                    
-                    // Создаем плавающий аватар для мобилки (поверх маски)
-                    const rect = card.getBoundingClientRect();
-                    shiftX = e.touches[0].clientX - rect.left;
-                    shiftY = e.touches[0].clientY - rect.top;
+                    if (!hasMoved) {
+                        isTouchDragging = true;
+                        if(navigator.vibrate) navigator.vibrate(50);
+                        
+                        const rect = card.getBoundingClientRect();
+                        shiftX = e.touches[0].clientX - rect.left;
+                        shiftY = e.touches[0].clientY - rect.top;
 
-                    avatar = card.cloneNode(true);
-                    avatar.classList.add('drag-avatar');
-                    avatar.style.width = `${card.offsetWidth}px`;
-                    document.body.appendChild(avatar);
+                        avatar = card.cloneNode(true);
+                        avatar.classList.add('drag-avatar');
+                        avatar.style.width = `${card.offsetWidth}px`;
+                        // Сильное мыло для аватара
+                        avatar.style.cssText += `backdrop-filter: blur(50px) !important; -webkit-backdrop-filter: blur(50px) !important; background-color: rgba(24, 24, 27, 0.2) !important;`;
+                        document.body.appendChild(avatar);
 
-                    card.classList.add('dragging'); 
-                    updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
-                }, 300);
+                        card.classList.add('dragging'); 
+                        updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, 1000); 
             }, {passive: true});
 
             card.addEventListener('touchmove', (e) => {
@@ -574,14 +639,12 @@
                 
                 if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
                     hasMoved = true;
+                    if (!isTouchDragging) clearTimeout(touchTimer); // Отменяем таймер, если это скролл страницы
                 }
                 
-                if (!isTouchDragging) {
-                    if (hasMoved) clearTimeout(touchTimer);
-                    return;
-                }
+                if (!isTouchDragging) return;
                 
-                e.preventDefault(); 
+                e.preventDefault(); // Блокируем скролл во время перетаскивания
                 updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
                 
                 const touch = e.touches[0];
@@ -604,15 +667,10 @@
                     avatar = null;
                     refreshUI(true);
                 } else if (!hasMoved && !e.target.closest('.rating-wrapper')) {
-                    // Короткий или долгий тап без движения -> открывает меню
-                    showContextMenu(e.changedTouches[0], card);
-                }
-            });
-
-            // ПК - контекстное меню
-            card.addEventListener('click', function(e) {
-                if (window.innerWidth > 768 && !e.target.closest('.rating-wrapper')) {
-                    showContextMenu(e, card);
+                    // Был короткий тап (< 1 сек) и без движения: Открываем меню
+                    e.preventDefault(); // Защита от лишних кликов
+                    const evt = { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+                    showContextMenu(evt, card);
                 }
             });
 
@@ -703,7 +761,7 @@
         
         // Drag & Drop (ПК)
         function onDragStart(e) {
-            if (window.innerWidth <= 768 || e.which !== 1) return;
+            if (window.innerWidth <= 768 || e.button !== 0) return; // Только левая кнопка мыши на ПК
             const card = e.target.closest('.card'); if (!card) return;
             if (e.target.closest('.rating-wrapper')) return;
 
@@ -713,6 +771,8 @@
             avatar = dragItem.cloneNode(true); 
             avatar.classList.add('drag-avatar');
             avatar.style.width = `${dragItem.offsetWidth}px`;
+            // Усиленное размытие для карточки в руке
+            avatar.style.cssText += `backdrop-filter: blur(50px) !important; -webkit-backdrop-filter: blur(50px) !important; background-color: rgba(24, 24, 27, 0.2) !important;`;
             document.body.appendChild(avatar); 
             
             dragItem.classList.add('dragging');
@@ -754,28 +814,28 @@
             menu.style.top = Math.max(10, safeY) + 'px';
         }
 
-        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.card') && !e.target.closest('#context-menu')) {
+                document.getElementById('context-menu').style.display = 'none';
+            }
+        });
+        document.addEventListener('contextmenu', (e) => {
+            if(!e.target.closest('.card')) document.getElementById('context-menu').style.display = 'none';
+        });
         
         function moveCurrent() {
             if (!contextTarget) return;
             const currentZoneId = contextTarget.closest('.column').id;
             const targetZoneId = currentZoneId === 'zone-watchlist' ? 'zone-watched' : 'zone-watchlist';
             document.getElementById(targetZoneId).querySelector('.task-list').prepend(contextTarget); 
+            document.getElementById('context-menu').style.display = 'none';
             refreshUI(true);
         }
 
-        function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); }
-        function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(true); }
-        function copyCurrent() { if (contextTarget) { navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); showToast('Название скопировано!'); } }
+        function editCurrent() { document.getElementById('movie-input').value = contextTarget.querySelector('.card-title').textContent; document.getElementById('modal-title').textContent = "Редактировать"; openModal('edit-modal'); document.getElementById('context-menu').style.display = 'none'; }
+        function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); document.getElementById('context-menu').style.display = 'none'; refreshUI(true); }
+        function copyCurrent() { if (contextTarget) { navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); showToast('Название скопировано!'); document.getElementById('context-menu').style.display = 'none'; } }
         function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(true); }
-        
-        function handleSearch() {
-            const q = document.getElementById('global-search').value.toLowerCase();
-            document.querySelectorAll('.card').forEach(c => {
-                const title = c.querySelector('.card-title').textContent.toLowerCase();
-                c.style.display = (!q || title.includes(q)) ? "flex" : "none";
-            });
-        }
         
         const clearBtn = document.getElementById('clear-btn');
         clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); showToast('Корзина очищена'); }, 800); });
