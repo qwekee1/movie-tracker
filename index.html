@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To Do Watch</title>
+    <script>
+        (function() {
+            // Тема теперь всегда темная, скрипт оставлен для безопасности старых бекапов
+            document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
     <style>
         /* Локальные шрифты */
         @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
@@ -43,7 +49,7 @@
         .top-bar {
             width: 100%; max-width: 1240px; display: flex; 
             justify-content: space-between; align-items: center; 
-            margin-bottom: 60px; height: 60px;
+            margin-bottom: 40px; height: 60px;
         }
         .greeting {
             font-size: 50px; font-weight: 700; color: var(--col-text);
@@ -108,7 +114,7 @@
 
         .column {
             background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
-            height: 60vh; min-height: 400px; display: flex; flex-direction: column; 
+            height: calc(100vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
             padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
 
@@ -117,7 +123,6 @@
             mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
             padding-bottom: 40px;
-            /* Полностью убираем скроллбары */
             scrollbar-width: none; 
             -ms-overflow-style: none;
         }
@@ -132,7 +137,6 @@
         }
         .card:hover { background-color: rgba(255,255,255,0.06); }
         
-        /* Блюр и прозрачность при перетаскивании */
         .card.dragging, .card.touch-drag { 
             opacity: 0.9; transform: scale(0.95); background-color: rgba(24, 24, 27, 0.6);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-color: var(--rating-green); z-index: 100;
@@ -141,11 +145,10 @@
         
         .card-number { color: var(--sub-text); font-size: 13px; width: 35px; flex-shrink: 0; }
         .card-title { flex-grow: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
-        
         .rating-wrapper { display: flex; align-items: center; gap: 2px; width: 100px; justify-content: flex-end; flex-shrink: 0; }
         .star-svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-        /* Модалки */
+        /* Модалки (Общие стили) */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.85); z-index: 2000;
@@ -166,11 +169,23 @@
         .btn-primary { background-color: var(--rating-green); color: #000; border: none; }
         .btn-primary:hover { background-color: var(--rating-green); opacity: 0.8; }
 
+        /* Настройки (Специальные цвета) */
+        #settings-modal .modal-content { background-color: #09090b; }
+        .settings-block {
+            background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 25px; border-radius: var(--card-radius); margin-bottom: 15px;
+        }
+        .btn-settings {
+            background-color: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 20px; border-radius: 12px; font-size: 16px; font-weight: bold; color: var(--col-text);
+            cursor: pointer; transition: all 0.2s; flex: 1;
+        }
+        .btn-settings:hover { background-color: rgba(255, 255, 255, 0.04); }
+
         /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
         #trash-content::-webkit-scrollbar { display: none; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 16px; border: var(--card-border); }
-        #trash-content .settings-row { margin-bottom: 8px; padding: 12px 25px; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 16px; border: var(--card-border); margin-bottom: 8px; }
 
         .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; border: none; }
         .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
@@ -187,13 +202,26 @@
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { padding: 15px 20px 110px 20px; overflow-y: auto; } /* Добавлен воздух по бокам (20px) */
-            .top-bar { margin-bottom: 40px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
-            .greeting { font-size: 32px; transition: opacity 0.2s; width: 100%; text-align: center; }
-            .header-controls { width: 100%; justify-content: center; }
+            body { padding: 30px 15px 100px 15px; overflow-y: auto; }
+            .top-bar { margin-bottom: 20px; height: auto; }
+            .greeting { font-size: 32px; text-align: center; width: 100%; }
             
-            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 65px; z-index: 10; }
-            .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
+            /* Кнопки переезжают вниз экрана */
+            .header-controls {
+                position: fixed; bottom: 0; left: 0; width: 100%;
+                background: var(--bg-color); padding: 15px 20px 30px 20px;
+                display: flex; justify-content: space-between; gap: 10px;
+                box-shadow: 0 -15px 30px var(--bg-color); z-index: 1000;
+            }
+            .icon-btn { flex: 1; width: auto; }
+            
+            .search-wrapper { flex: 1; width: auto; }
+            .search-icon-btn { width: 100%; } 
+            
+            .search-wrapper.active { 
+                position: absolute; top: 15px; left: 20px; width: calc(100% - 40px); z-index: 10;
+            }
+            .search-wrapper.active .search-icon-btn { width: 50px; }
             
             .board { flex-direction: column; gap: 20px; }
             .column-wrapper { width: 100%; }
@@ -209,23 +237,8 @@
             .column-wrapper.mobile-closed .column { padding: 0; border: none; background: transparent; }
             .column-wrapper.mobile-closed .column-title { opacity: 0.6; }
             
-            .modal-content { width: 100%; padding: 25px 20px; }
+            .modal-content { width: 95%; padding: 25px 20px; }
             .card { padding: 14px 15px; }
-            
-            /* Плавающие кнопки управления внизу экрана */
-            .mobile-bottom-controls {
-                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
-                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 10px; justify-content: space-between;
-                box-shadow: 0 -15px 30px var(--bg-color);
-            }
-            .mobile-bottom-controls .btn-modal { padding: 14px 5px; font-size: 14px; text-align: center; }
-        }
-        
-        /* Скрываем нижние кнопки на ПК, показываем верхние на ПК */
-        .mobile-bottom-controls { display: none; }
-        @media (max-width: 768px) {
-            .header-controls .icon-btn:not(#search-box) { display: none; } /* Скрыть корзину и настройки сверху */
-            .mobile-bottom-controls { display: flex; }
         }
     </style>
 </head>
@@ -261,12 +274,6 @@
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
             </button>
         </div>
-    </div>
-
-    <div class="mobile-bottom-controls">
-        <button class="btn-modal" onclick="openModal('edit-modal')">Добавить</button>
-        <button class="btn-modal" onclick="openModal('trash-modal')">Корзина</button>
-        <button class="btn-modal" onclick="openModal('settings-modal')">Настройки</button>
     </div>
 
     <div class="board">
@@ -352,25 +359,25 @@
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
             
-            <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: var(--card-radius); margin-bottom: 15px; border: var(--card-border);">
+            <div class="settings-block">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px;">
-                    <button class="btn-modal" style="padding: 12px 20px; flex: unset;" onclick="copySettingsKey()">Копировать</button>
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px; background: rgba(255,255,255,0.02); border: none;">
+                    <button class="btn-settings" style="flex: unset;" onclick="copySettingsKey()">Копировать</button>
                 </div>
-                <button class="btn-modal" style="width: 100%; background: var(--danger); border-color: var(--danger); color: white;" onclick="openModal('logout-modal')">Выйти из профиля</button>
+                <button class="btn-settings" style="width: 100%; border-color: rgba(239, 68, 68, 0.2); color: var(--danger);" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
 
-            <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: var(--card-radius); margin-bottom: 15px; border: var(--card-border);">
+            <div class="settings-block">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Бекап</div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn-modal" onclick="exportData()">Экспорт</button>
-                    <button class="btn-modal" onclick="document.getElementById('import-input').click()">Импорт</button>
+                    <button class="btn-settings" onclick="exportData()">Экспорт</button>
+                    <button class="btn-settings" onclick="document.getElementById('import-input').click()">Импорт</button>
                 </div>
                 <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
             </div>
             
-            <button class="btn-modal" onclick="closeModal('settings-modal')">Закрыть</button>
+            <button class="btn-settings" style="width: 100%; margin-top: 10px;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -510,34 +517,39 @@
             // ПК drag&drop
             card.addEventListener('mousedown', onDragStart);
             
-            // Мобилки - умное разделение тапа и перетаскивания
+            // Блокируем системное меню на мобилках
+            card.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                if (window.innerWidth > 768) showContextMenu(e, card);
+            });
+            
+            // Мобилки - строгое разделение перетаскивания и тапа
             let touchTimer;
             let isTouchDragging = false;
-            let hasMoved = false;
-            let initialY;
+            let wasJustDragging = false;
+            let startY, startX;
 
             card.addEventListener('touchstart', (e) => {
                 if (window.innerWidth > 768) return;
-                initialY = e.touches[0].clientY;
-                hasMoved = false;
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
                 isTouchDragging = false;
+                wasJustDragging = false;
                 
                 touchTimer = setTimeout(() => {
                     isTouchDragging = true;
                     if(navigator.vibrate) navigator.vibrate(50);
                     card.classList.add('touch-drag');
-                }, 500); // 0.5 секунды для активации драг-н-дропа
+                }, 400); // 400ms для активации драга
             }, {passive: true});
 
             card.addEventListener('touchmove', (e) => {
                 if (window.innerWidth > 768) return;
                 
-                if (Math.abs(e.touches[0].clientY - initialY) > 10) {
-                    hasMoved = true;
-                }
-                
                 if (!isTouchDragging) {
-                    if (hasMoved) clearTimeout(touchTimer); // Отменяем драг, если это просто скролл страницы
+                    if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
+                        clearTimeout(touchTimer); // Отменяем драг, если это скролл страницы
+                    }
                     return;
                 }
                 
@@ -557,19 +569,18 @@
                 clearTimeout(touchTimer);
                 
                 if (isTouchDragging) {
-                    // Закончили перетаскивать - меню НЕ открываем
                     card.classList.remove('touch-drag');
                     isTouchDragging = false;
+                    wasJustDragging = true;
+                    setTimeout(() => wasJustDragging = false, 50); // Блокируем клик, который идет сразу за touchEnd
                     refreshUI(true);
-                } else if (!hasMoved && !e.target.closest('.rating-wrapper')) {
-                    // Был обычный тап (не скролл и не долгое нажатие) - Открываем меню
-                    showContextMenu(e.changedTouches[0], card);
                 }
             });
 
-            // ПК - контекстное меню
-            card.addEventListener('click', function(e) {
-                if (window.innerWidth > 768 && !e.target.closest('.rating-wrapper')) {
+            // Открытие меню по короткому тапу
+            card.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    if (wasJustDragging || e.target.closest('.rating-wrapper')) return;
                     showContextMenu(e, card);
                 }
             });
@@ -691,7 +702,7 @@
         }
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
-        // Контекстное меню
+        // Умное контекстное меню
         function showContextMenu(evtData, card) {
             contextTarget = card; 
             const menu = document.getElementById('context-menu'); 
@@ -707,10 +718,6 @@
             menu.style.top = Math.max(10, safeY) + 'px';
         }
 
-        document.addEventListener('contextmenu', e => {
-            const card = e.target.closest('.card');
-            if (card) { e.preventDefault(); showContextMenu(e, card); }
-        });
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
         
         function moveCurrent() {
