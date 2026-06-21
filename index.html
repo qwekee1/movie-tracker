@@ -44,7 +44,7 @@
             min-height: 100vh; padding: 40px 20px 0 20px; overflow: hidden;
         }
 
-        /* Убираем скроллбары везде */
+        /* Убираем скроллбары */
         ::-webkit-scrollbar { width: 0px; display: none; }
         * { scrollbar-width: none; -ms-overflow-style: none; }
 
@@ -52,11 +52,12 @@
         .top-bar {
             width: 100%; max-width: 1240px; display: flex; 
             justify-content: space-between; align-items: center; 
-            margin-bottom: 40px; height: 60px;
+            margin-bottom: 80px; height: 60px; position: relative;
         }
         .greeting {
             font-size: 50px; font-weight: 700; color: var(--col-text);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: opacity 0.3s ease;
         }
         .greeting span { color: var(--rating-green); }
 
@@ -67,8 +68,8 @@
         /* Поиск */
         .search-wrapper {
             position: relative; height: 50px; width: 50px; 
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
-            border-radius: var(--card-radius); background-color: var(--card-bg); 
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s ease, top 0.4s ease, opacity 0.3s; 
+            overflow: hidden; border-radius: var(--card-radius); background-color: var(--card-bg); 
             border: var(--card-border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .search-wrapper.active { width: 300px; }
@@ -84,7 +85,7 @@
             display: flex; align-items: center; justify-content: center; z-index: 2;
         }
 
-        /* Кнопки-иконки в шапке */
+        /* Кнопки-иконки */
         .icon-btn {
             width: 50px; height: 50px; border-radius: var(--card-radius);
             background-color: var(--card-bg); border: var(--card-border);
@@ -117,7 +118,7 @@
 
         .column {
             background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
-            height: calc(100vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
+            height: calc(90vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
             padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
 
@@ -137,12 +138,12 @@
         }
         .card:hover { background-color: rgba(255,255,255,0.06); }
         
-        /* Плейсхолдер (оригинальная карточка, которая остается в списке при переносе) */
+        /* Плейсхолдер при переносе */
         .card.dragging { 
             opacity: 0.4; border: 2px dashed var(--rating-green); background: transparent; transform: scale(0.98);
         }
 
-        /* Аватарка (карточка, которая летает за мышкой/пальцем) */
+        /* Клон карточки в руке */
         .drag-avatar {
             position: fixed; pointer-events: none; z-index: 9999;
             background-color: rgba(24, 24, 27, 0.2) !important;
@@ -157,7 +158,7 @@
         .rating-wrapper { display: flex; align-items: center; gap: 2px; width: 100px; justify-content: flex-end; flex-shrink: 0; }
         .star-svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-        /* Модалки (Общие стили) */
+        /* Модалки */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.85); z-index: 2000;
@@ -165,91 +166,105 @@
             opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(10px);
         }
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
-        .modal-content { background-color: #18181b; border: var(--card-border); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
-        .modal-content input { background: rgba(255,255,255,0.05); border: var(--card-border); padding: 18px; border-radius: 16px; color: inherit; font-size: 16px; outline: none; user-select: text; transition: border 0.2s; }
+        
+        .modal-content { 
+            background-color: #18181b; border: 1px solid rgba(255, 255, 255, 0.08); 
+            width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); 
+        }
+        .modal-content input { 
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255, 255, 255, 0.08); 
+            padding: 18px; border-radius: 16px; color: inherit; font-size: 16px; outline: none; user-select: text; transition: border 0.2s; 
+        }
         .modal-content input:focus { border-color: var(--rating-green); }
         
         .btn-modal {
-            background-color: #27272a; border: var(--card-border); padding: 18px 20px;
+            background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 18px 20px;
             border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text); cursor: pointer;
             flex: 1; transition: all 0.2s;
         }
-        .btn-modal:hover { background-color: #3f3f46; }
+        .btn-modal:hover { background-color: rgba(255,255,255,0.1); }
         .btn-primary { background-color: var(--rating-green); color: #000; border: none; }
         .btn-primary:hover { background-color: var(--rating-green); opacity: 0.8; }
 
-        /* Настройки (Специальные цвета) */
-        #settings-modal .modal-content { background-color: #18181b; }
+        /* Настройки (Новая палитра и жесткие обводки) */
+        #settings-modal .modal-content, #trash-modal .modal-content { background-color: #18181b; }
         .settings-block {
-            background: transparent; border: none;
-            padding: 10px 0; margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px; border-radius: 20px; margin-bottom: 20px;
+        }
+        .settings-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255, 255, 255, 0.02); padding: 15px 25px; border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 8px; 
         }
         .btn-settings {
-            background-color: #27272a; border: var(--card-border);
+            background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 18px 20px; border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text);
             cursor: pointer; transition: all 0.2s; flex: 1;
         }
-        .btn-settings:hover { background-color: #3f3f46; }
+        .btn-settings:hover { background-color: rgba(255, 255, 255, 0.1); }
 
         /* Корзина */
         #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; background: #27272a; padding: 15px 25px; border-radius: 16px; border: var(--card-border); margin-bottom: 8px; }
-
         .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; border: none; }
         .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
         .btn-hold.holding .fill { width: 100%; transition: width 0.8s linear; }
 
         /* Контекстное меню */
         #context-menu {
-            position: fixed; background: #222; border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: fixed; background: #1c1c1e; border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; font-weight: 500; }
-        .menu-item:hover { background: #333; }
+        .menu-item:hover { background: rgba(255,255,255,0.08); }
 
         /* ========================================= */
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { padding: 30px 15px 100px 15px; overflow-y: auto; }
-            .top-bar { margin-bottom: 70px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
-            .greeting { font-size: 36px; transition: opacity 0.2s; width: 100%; text-align: center; }
-            .header-controls { width: 100%; justify-content: center; }
+            body { padding: 30px 15px 120px 15px; overflow-y: auto; }
+            .top-bar { margin-bottom: 80px; flex-wrap: wrap; height: auto; justify-content: center; }
+            .greeting { font-size: 36px; width: 100%; text-align: center; }
             
-            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 75px; z-index: 10; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+            /* Скрываем ПК управление сверху */
+            .header-controls { display: none; }
+            
+            /* Поиск выезжает сверху красивой плашкой */
+            .search-wrapper { position: absolute; top: -100px; left: 0; width: 100%; z-index: 1010; opacity: 0; pointer-events: none; }
+            .search-wrapper.active { top: 5px; opacity: 1; pointer-events: auto; width: 100%; }
             .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
             
             .board { flex-direction: column; gap: 20px; }
             .column-wrapper { width: 100%; }
             .column-title { font-size: 22px; margin-bottom: 10px; cursor: pointer; }
-            .column { height: auto; min-height: unset; padding: 15px; }
+            .column { height: calc(90vh - 200px); min-height: 350px; padding: 15px; }
             
             .task-list {
-                max-height: 60vh; opacity: 1; padding-bottom: 10px;
+                max-height: 100%; opacity: 1; padding-bottom: 10px;
                 transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             }
 
             .column-wrapper.mobile-closed .task-list { max-height: 0; opacity: 0; overflow: hidden; padding-bottom: 0; }
-            .column-wrapper.mobile-closed .column { padding: 0; border: none; background: transparent; }
+            .column-wrapper.mobile-closed .column { padding: 0; border: none; background: transparent; height: auto; min-height: unset; }
             .column-wrapper.mobile-closed .column-title { opacity: 0.6; }
             
             .modal-content { width: 95%; padding: 25px 20px; }
             .card { padding: 14px 15px; }
             
-            /* Плавающие кнопки управления внизу экрана */
+            /* Фиксированные 4 кнопки в ряд внизу экрана (иконки без текста) */
             .mobile-bottom-controls {
-                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
-                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 10px; justify-content: space-between;
-                box-shadow: 0 -15px 30px var(--bg-color);
+                position: fixed; bottom: 0; left: 0; width: 100%; background: #09090b; 
+                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 12px; justify-content: space-between;
+                box-shadow: 0 -15px 30px #09090b; border-top: 1px solid rgba(255,255,255,0.05);
             }
-            .mobile-bottom-controls .btn-modal { padding: 14px 5px; font-size: 14px; text-align: center; background: #18181b; }
+            .mobile-bottom-controls .icon-btn-mob { 
+                flex: 1; height: 55px; border-radius: var(--card-radius); background: #18181b;
+                border: 1px solid rgba(255,255,255,0.08); color: var(--col-text); display: flex; 
+                align-items: center; justify-content: center; cursor: pointer;
+            }
         }
         
-        /* Скрываем нижние кнопки на ПК, показываем верхние на ПК */
         .mobile-bottom-controls { display: none; }
-        @media (max-width: 768px) {
-            .header-controls .icon-btn:not(#search-box) { display: none; } /* Скрыть корзину и настройки сверху */
-            .mobile-bottom-controls { display: flex; }
-        }
+        @media (max-width: 768px) { .mobile-bottom-controls { display: flex; } }
     </style>
 </head>
 <body>
@@ -267,13 +282,15 @@
 
     <div class="top-bar">
         <div class="greeting">Привет, <span id="display-name">Гость</span></div>
+        
+        <div class="search-wrapper" id="search-box">
+            <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
+            <button class="search-icon-btn" id="search-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+
         <div class="header-controls">
-            <div class="search-wrapper" id="search-box">
-                <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
-                <button class="search-icon-btn" id="search-btn">
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </button>
-            </div>
             <button class="icon-btn" onclick="openModal('edit-modal')" title="Добавить фильм">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
@@ -281,15 +298,24 @@
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
             <button class="icon-btn" onclick="openModal('settings-modal')" title="Настройки">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
             </button>
         </div>
     </div>
 
     <div class="mobile-bottom-controls">
-        <button class="btn-modal" onclick="openModal('edit-modal')">Добавить</button>
-        <button class="btn-modal" onclick="openModal('trash-modal')">Корзина</button>
-        <button class="btn-modal" onclick="openModal('settings-modal')">Настройки</button>
+        <button class="icon-btn-mob" onclick="toggleSearch()" title="Поиск">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('edit-modal')" title="Добавить">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('trash-modal')" title="Корзина">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+        <button class="icon-btn-mob" onclick="openModal('settings-modal')" title="Настройки">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+        </button>
     </div>
 
     <div class="board">
@@ -308,13 +334,13 @@
             <h2 style="margin-bottom: 15px;">Синхронизация</h2>
             <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый код.</p>
 
-            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; margin-bottom: 15px; border: var(--card-border);">
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08);">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Новый профиль</h4>
                 <input type="text" id="auth-name" placeholder="Ваше имя..." style="width: 100%; text-align: center; margin-bottom: 15px;">
                 <button class="btn-modal btn-primary" style="width: 100%;" onclick="createNewProfile()">Создать профиль</button>
             </div>
 
-            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; border: var(--card-border);">
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.08);">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть код?</h4>
                 <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" style="width: 100%; text-align: center; text-transform: uppercase; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px;">
                 <button class="btn-modal btn-primary" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
@@ -431,17 +457,19 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // Поиск в шапке (без авто-фокуса)
+        // Поиск в шапке / навигации
         const searchBox = document.getElementById('search-box');
         const searchInput = document.getElementById('global-search');
-        document.getElementById('search-btn').addEventListener('click', () => {
+        
+        function toggleSearch() {
             searchBox.classList.toggle('active');
             if(!searchBox.classList.contains('active')) {
                 searchInput.value = ''; handleSearch(); 
             }
-        });
+        }
+        document.getElementById('search-btn').addEventListener('click', toggleSearch);
 
-        // Авторизация и Синхронизация
+        // Генерация кодов авторизации
         function generateShortCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -506,12 +534,11 @@
 
         async function pushToCloud(boardData, deletedList) {
             const key = localStorage.getItem('syncKey');
-            const userName = localStorage.getItem('syncName') || 'User';
             if (!key) return; 
             try {
                 await fetch('/api/save', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key, userName, boardData, deletedMovies: deletedList })
+                    body: JSON.stringify({ key, userName: localStorage.getItem('syncName') || 'User', boardData, deletedMovies: deletedList })
                 });
             } catch (e) { console.error('Сбой фонового сохранения', e); }
         }
@@ -531,33 +558,49 @@
             card.className = 'card';
             card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>${getStarsHTML(rating)}`;
             
-            // ПК drag&drop
+            // --- ПК Управление ---
             card.addEventListener('mousedown', onDragStart);
+            card.addEventListener('contextmenu', e => { 
+                e.preventDefault(); 
+                showContextMenu(e, card); 
+            });
             
-            // Блокируем системное меню
-            card.addEventListener('contextmenu', e => { e.preventDefault(); });
-            
-            // Мобилки - строгое разделение перетаскивания и тапа
+            // --- Смартфоны: разделение зажатия (меню) и перемещения ---
             let touchTimer;
-            let isTouchDragging = false;
+            let isDraggingMobile = false;
             let hasMoved = false;
-            let startY, startX;
+            let startX, startY;
 
             card.addEventListener('touchstart', (e) => {
-                if (window.innerWidth > 768) return;
-                startY = e.touches[0].clientY;
                 startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
                 hasMoved = false;
-                isTouchDragging = false;
+                isDraggingMobile = false;
                 
                 touchTimer = setTimeout(() => {
-                    isTouchDragging = true;
-                    if(navigator.vibrate) navigator.vibrate(50);
-                    
-                    // Создаем плавающий аватар для мобилки (поверх маски)
+                    // Зажатие сработало -> Открываем контекстное меню
+                    if (!hasMoved) {
+                        if (navigator.vibrate) navigator.vibrate(50);
+                        showContextMenu(e.touches[0], card);
+                    }
+                }, 500); // 500мс зажатия для вызова меню
+            }, {passive: true});
+
+            card.addEventListener('touchmove', (e) => {
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                
+                if (Math.abs(currentX - startX) > 10 || Math.abs(currentY - startY) > 10) {
+                    hasMoved = true;
+                    clearTimeout(touchTimer); // Сдвинули палец — отменяем таймер меню
+                }
+                
+                // Если сдвинули и меню не открыто — запускаем плавное перемещение
+                if (hasMoved && !isDraggingMobile && document.getElementById('context-menu').style.cssText.includes('display: block') === false) {
+                    isDraggingMobile = true;
                     const rect = card.getBoundingClientRect();
-                    shiftX = e.touches[0].clientX - rect.left;
-                    shiftY = e.touches[0].clientY - rect.top;
+                    shiftX = currentX - rect.left;
+                    shiftY = currentY - rect.top;
 
                     avatar = card.cloneNode(true);
                     avatar.classList.add('drag-avatar');
@@ -565,54 +608,29 @@
                     document.body.appendChild(avatar);
 
                     card.classList.add('dragging'); 
-                    updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
-                }, 300);
-            }, {passive: true});
-
-            card.addEventListener('touchmove', (e) => {
-                if (window.innerWidth > 768) return;
-                
-                if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
-                    hasMoved = true;
                 }
                 
-                if (!isTouchDragging) {
-                    if (hasMoved) clearTimeout(touchTimer);
-                    return;
+                if (isDraggingMobile) {
+                    e.preventDefault(); 
+                    updateAvatarPos(currentX, currentY);
+                    
+                    const list = card.parentElement;
+                    const siblings = [...list.querySelectorAll('.card:not(.dragging)')];
+                    const nextSibling = siblings.find(sibling => currentY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2);
+                    
+                    if (nextSibling) list.insertBefore(card, nextSibling);
+                    else list.appendChild(card);
                 }
-                
-                e.preventDefault(); 
-                updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
-                
-                const touch = e.touches[0];
-                const list = card.parentElement;
-                const siblings = [...list.querySelectorAll('.card:not(.dragging)')];
-                const nextSibling = siblings.find(sibling => touch.clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2);
-                
-                if (nextSibling) list.insertBefore(card, nextSibling);
-                else list.appendChild(card);
             }, {passive: false});
 
             card.addEventListener('touchend', (e) => {
-                if (window.innerWidth > 768) return;
                 clearTimeout(touchTimer);
-                
-                if (isTouchDragging) {
+                if (isDraggingMobile) {
                     if (avatar) avatar.remove();
                     card.classList.remove('dragging');
-                    isTouchDragging = false;
+                    isDraggingMobile = false;
                     avatar = null;
                     refreshUI(true);
-                } else if (!hasMoved && !e.target.closest('.rating-wrapper')) {
-                    // Короткий или долгий тап без движения -> открывает меню
-                    showContextMenu(e.changedTouches[0], card);
-                }
-            });
-
-            // ПК - контекстное меню
-            card.addEventListener('click', function(e) {
-                if (window.innerWidth > 768 && !e.target.closest('.rating-wrapper')) {
-                    showContextMenu(e, card);
                 }
             });
 
@@ -665,7 +683,7 @@
             });
         }
 
-        // Рейтинг
+        // Логика кастомного Рейтинга (Звёзд)
         function initPicker() {
             const container = document.getElementById('picker-container'); container.innerHTML = '';
             for (let i = 1; i <= 5; i++) {
@@ -701,7 +719,7 @@
         function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(true); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
         
-        // Drag & Drop (ПК)
+        // Перенос Drag & Drop (ПК)
         function onDragStart(e) {
             if (window.innerWidth <= 768 || e.which !== 1) return;
             const card = e.target.closest('.card'); if (!card) return;
@@ -738,7 +756,7 @@
         }
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
-        // Умное контекстное меню
+        // Позиционирование Контекстного меню
         function showContextMenu(evtData, card) {
             contextTarget = card; 
             const menu = document.getElementById('context-menu'); 
@@ -754,7 +772,13 @@
             menu.style.top = Math.max(10, safeY) + 'px';
         }
 
-        document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
+        // Закрытие контекстного меню при клике по экрану
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.card')) document.getElementById('context-menu').style.display = 'none';
+        });
+        document.addEventListener('contextmenu', (e) => {
+            if(!e.target.closest('.card')) document.getElementById('context-menu').style.display = 'none';
+        });
         
         function moveCurrent() {
             if (!contextTarget) return;
@@ -781,7 +805,7 @@
         clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); showToast('Корзина очищена'); }, 800); });
         clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
         
-        // --- Восстановление бекапа ---
+        // Экспорт / Импорт данных
         function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); showToast('Бекап скачан'); }
         
         function importData(e) { 
@@ -791,16 +815,14 @@
                 const data = JSON.parse(ev.target.result); 
                 localStorage.setItem('boardData', JSON.stringify(data.boardData)); 
                 localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); 
-                
                 await pushToCloud(data.boardData, data.deletedMovies);
-                
                 showToast('Успешно восстановлено!');
                 setTimeout(() => location.reload(), 500); 
             }; 
             reader.readAsText(file); 
         }
         
-        // --- Рендер ---
+        // Синхронизация и Рендер интерфейса
         function loadBoardFromStorage() {
             const saved = JSON.parse(localStorage.getItem('boardData'));
             if (saved) {
@@ -836,7 +858,7 @@
         window.onload = async () => {
             initPicker();
             
-            // Мобильные аккордеоны
+            // Мобильные аккордеоны (раскрытие колонок)
             document.querySelectorAll('.column-title').forEach(header => {
                 header.addEventListener('click', function() {
                     if (window.innerWidth > 768) return; 
@@ -851,8 +873,7 @@
             if (window.innerWidth <= 768) document.getElementById('wrap-watched').classList.add('mobile-closed');
 
             const key = localStorage.getItem('syncKey');
-            const name = localStorage.getItem('syncName');
-            setDisplayName(name);
+            setDisplayName(localStorage.getItem('syncName'));
 
             if (!key) { document.getElementById('auth-modal').classList.add('is-open'); return; }
 
