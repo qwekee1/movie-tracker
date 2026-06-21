@@ -6,343 +6,249 @@
     <title>To Do Watch</title>
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', 'dark');
         })();
     </script>
     <style>
-        :root {
-            --bg-color: #E8E8E8;
-            --col-bg: #FFFFFF;
-            --col-text: #121212;
-            --card-bg: #DCDCDC;
-            --card-text: #121212;
-            --sub-text: rgba(0, 0, 0, 0.2);
-            --header-sub: rgba(0, 0, 0, 0.4);
-            --rating-green: #28a745;
-            --rating-gray: rgba(128, 128, 128, 0.25);
-            --danger: #ff4d4d;
-            --glass-bg: rgba(255, 255, 255, 0.4);
-            --glass-border: rgba(0, 0, 0, 0.08);
-        }
+        /* Локальные шрифты */
+        @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
+        @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; }
+        @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; }
+        @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; }
+        @font-face { font-family: 'Gilroy'; src: url('./fonts/Gilroy-Extrabold.woff2') format('woff2'); font-weight: 800; font-style: normal; }
 
-        html[data-theme="dark"] {
-            --bg-color: #0f0f0f;
-            --col-bg: #222222;
+        :root {
+            --bg-color: #09090b;
+            --col-bg: transparent;
             --col-text: #ffffff;
-            --card-bg: #333333;
+            --card-bg: #18181b99;
+            --card-border: 1px solid rgba(255, 255, 255, 0.05);
+            --card-radius: 20px;
             --card-text: #ffffff;
-            --sub-text: rgb(255 255 255 / 40%);
-            --header-sub: rgb(255 255 255 / 40%);
-            --rating-green: #4cd964;
+            --sub-text: rgba(255, 255, 255, 0.4);
+            --header-sub: rgba(255, 255, 255, 0.4);
+            --rating-green: #10b981;
             --rating-gray: rgba(255, 255, 255, 0.1);
-            --glass-bg: rgba(34, 34, 34, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --danger: #ff4d4d;
         }
 
         * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Gilroy', 'Segoe UI', sans-serif;
-            -webkit-user-select: none;
-            user-select: none;
+            box-sizing: border-box; margin: 0; padding: 0;
+            font-family: 'Gilroy', sans-serif;
+            -webkit-user-select: none; user-select: none;
         }
 
         body {
-            background-color: var(--bg-color); 
-            color: var(--col-text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 40px 20px;
-            overflow-x: hidden;
-            transition: background-color 0.3s ease;
+            background-color: var(--bg-color); color: var(--col-text);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 40px 20px 0 20px; overflow: hidden;
         }
 
-        /* Toast-уведомление */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--rating-green);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 14px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 4000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        /* Убираем скроллбары везде */
+        ::-webkit-scrollbar { width: 0px; display: none; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* Шапка */
+        .top-bar {
+            width: 100%; max-width: 1240px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            margin-bottom: 40px; height: 60px;
         }
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            top: 40px;
+        .greeting {
+            font-size: 50px; font-weight: 700; color: var(--col-text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .greeting span { color: var(--rating-green); }
+
+        .header-controls {
+            display: flex; gap: 12px; align-items: center;
         }
 
-        /* Шапка с кнопками и поиском на ПК */
-        .header-actions {
-            width: 100%;
-            max-width: 1240px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 30px;
+        /* Поиск */
+        .search-wrapper {
+            position: relative; height: 50px; width: 50px; 
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden;
+            border-radius: var(--card-radius); background-color: var(--card-bg); 
+            border: var(--card-border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
-
-        .search-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
+        .search-wrapper.active { width: 300px; }
         .search-input {
-            width: 100%; background-color: var(--col-bg); border: none; padding: 18px 30px;
-            border-radius: 50px; color: var(--col-text); font-size: 16px; outline: none; user-select: text;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            width: 100%; height: 100%; background: transparent; border: none; 
+            padding: 0 50px 0 20px; color: var(--col-text); font-size: 16px; outline: none; user-select: text;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
         }
-        #mobile-search-close {
-            display: none;
+        .search-wrapper.active .search-input { opacity: 1; pointer-events: auto; }
+        .search-icon-btn {
+            position: absolute; right: 0; top: 0; width: 50px; height: 50px;
+            background: transparent; border: none; cursor: pointer; color: var(--col-text);
+            display: flex; align-items: center; justify-content: center; z-index: 2;
         }
 
-        /* Кнопки */
-        .controls { display: flex; gap: 12px; flex: 1; max-width: 600px; }
-        .btn {
-            flex: 1; background-color: var(--col-bg); border: none; padding: 14px 20px;
-            border-radius: 50px; font-size: 16px; font-weight: bold; color: var(--col-text);
-            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.2s ease;
-            white-space: nowrap;
+        /* Кнопки-иконки в шапке */
+        .icon-btn {
+            width: 50px; height: 50px; border-radius: var(--card-radius);
+            background-color: var(--card-bg); border: var(--card-border);
+            color: var(--col-text); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.2s;
         }
-        .btn:hover { transform: translateY(-2px); }
-        #mobile-search-btn { display: none; } /* Нужен только на мобилке */
+        .icon-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--rating-green); color: white; padding: 12px 25px;
+            border-radius: 50px; font-weight: bold; font-size: 14px; opacity: 0;
+            visibility: hidden; transition: all 0.3s ease; z-index: 4000; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; visibility: visible; top: 40px; }
 
         /* Доска */
-        .board { display: flex; gap: 30px; width: 100%; max-width: 1240px; margin-bottom: 30px; justify-content: center; }
+        .board { display: flex; gap: 30px; width: 100%; max-width: 1240px; margin-bottom: 0; justify-content: center; align-items: flex-start; }
+        .column-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .column-title {
+            color: var(--col-text); font-size: 24px; font-weight: 700; 
+            display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding-left: 5px;
+        }
+        .count-badge { 
+            background: var(--card-bg); border: var(--card-border); color: var(--header-sub); 
+            font-weight: 600; font-size: 16px; padding: 4px 12px; border-radius: 12px; backdrop-filter: blur(10px);
+        }
+
         .column {
-            background-color: var(--col-bg); flex: 1; max-width: 600px; height: 720px;
-            border-radius: 30px; padding: 30px 20px; display: flex; flex-direction: column; transition: background-color 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            background-color: var(--card-bg); border: var(--card-border); border-radius: var(--card-radius);
+            height: calc(100vh - 200px); min-height: 400px; display: flex; flex-direction: column; 
+            padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
-        
-        .column-header { 
-            color: var(--col-text); font-size: 22px; font-weight: bold; margin-bottom: 25px; 
-            text-align: center; display: flex; justify-content: center; gap: 8px;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .count-badge { color: var(--header-sub); font-weight: 500; }
 
         .task-list { 
-            width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scrollbar-width: none;
+            width: 100%; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            padding-bottom: 40px; position: relative;
         }
-        .task-list::-webkit-scrollbar { display: none; }
 
+        /* Карточки */
         .card {
             flex-shrink: 0;
-            background-color: var(--card-bg); color: var(--card-text); padding: 16px 25px;
-            border-radius: 50px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
-            position: relative; overflow: hidden; cursor: grab; transition: opacity 0.3s, transform 0.2s, box-shadow 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            background-color: rgba(255,255,255,0.03); border: var(--card-border); color: var(--card-text); padding: 18px 25px;
+            border-radius: 16px; font-size: 16px; font-weight: 600; display: flex; align-items: center;
+            position: relative; overflow: hidden; cursor: grab; transition: background 0.2s, transform 0.2s;
         }
-        .card.dragging { opacity: 0.4; }
-        .card-number { color: var(--sub-text); font-size: 13px; width: 35px; flex-shrink: 0; }
-        .card-title { flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
+        .card:hover { background-color: rgba(255,255,255,0.06); }
         
+        /* Плейсхолдер (оригинальная карточка, которая остается в списке при переносе) */
+        .card.dragging { 
+            opacity: 0.4; border: 2px dashed var(--rating-green); background: transparent; transform: scale(0.98);
+        }
+
+        /* Аватарка (карточка, которая летает за мышкой/пальцем) */
+        .drag-avatar {
+            position: fixed; pointer-events: none; z-index: 9999;
+            background-color: rgba(24, 24, 27, 0.2) !important;
+            backdrop-filter: blur(50px) !important; -webkit-backdrop-filter: blur(50px) !important;
+            border: 1px solid var(--rating-green) !important; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            padding: 18px 25px; display: flex; align-items: center; font-weight: 600; font-size: 16px; color: #fff;
+        }
+        
+        .card-number { color: var(--sub-text); font-size: 13px; width: 35px; flex-shrink: 0; }
+        .card-title { flex-grow: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; }
         .rating-wrapper { display: flex; align-items: center; gap: 2px; width: 100px; justify-content: flex-end; flex-shrink: 0; }
         .star-svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-        /* Модалки (Glassmorphism) */
+        /* Модалки (Общие стили) */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); z-index: 2000;
+            background-color: rgba(0, 0, 0, 0.85); z-index: 2000;
             display: flex; justify-content: center; align-items: center;
-            opacity: 0; visibility: hidden; transition: all 0.3s;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(10px);
         }
         .modal-overlay.is-open { opacity: 1; visibility: visible; }
-        .modal-content { 
-            background-color: var(--glass-bg); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        .modal-content { background-color: #18181b; border: var(--card-border); width: 450px; padding: 35px; border-radius: 30px; display: flex; flex-direction: column; color: var(--col-text); }
+        .modal-content input { background: rgba(255,255,255,0.05); border: var(--card-border); padding: 18px; border-radius: 16px; color: inherit; font-size: 16px; outline: none; user-select: text; transition: border 0.2s; }
+        .modal-content input:focus { border-color: var(--rating-green); }
+        
+        .btn-modal {
+            background-color: #27272a; border: var(--card-border); padding: 18px 20px;
+            border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text); cursor: pointer;
+            flex: 1; transition: all 0.2s;
         }
+        .btn-modal:hover { background-color: #3f3f46; }
+        .btn-primary { background-color: var(--rating-green); color: #000; border: none; }
+        .btn-primary:hover { background-color: var(--rating-green); opacity: 0.8; }
+
+        /* Настройки (Специальные цвета) */
+        #settings-modal .modal-content { background-color: #18181b; }
+        .settings-block {
+            background: transparent; border: none;
+            padding: 10px 0; margin-bottom: 20px;
+        }
+        .btn-settings {
+            background-color: #27272a; border: var(--card-border);
+            padding: 18px 20px; border-radius: 16px; font-size: 16px; font-weight: bold; color: var(--col-text);
+            cursor: pointer; transition: all 0.2s; flex: 1;
+        }
+        .btn-settings:hover { background-color: #3f3f46; }
 
         /* Корзина */
-        #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; scrollbar-width: none; }
-        #trash-content::-webkit-scrollbar { display: none; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 20px; }
-        
-        #trash-content .settings-row { 
-            border-radius: 50px; 
-            margin-bottom: 8px; 
-            padding: 10px 25px; 
-        }
+        #trash-content { max-height: 350px; overflow-y: auto; margin-bottom: 20px; }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: #27272a; padding: 15px 25px; border-radius: 16px; border: var(--card-border); margin-bottom: 8px; }
 
-        /* Остальное */
-        .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; }
+        .btn-hold { background-color: var(--danger) !important; color: white !important; position: relative; overflow: hidden; border: none; }
         .btn-hold .fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background-color: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
         .btn-hold.holding .fill { width: 100%; transition: width 0.8s linear; }
 
+        /* Контекстное меню */
         #context-menu {
-            position: fixed; 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; 
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            position: fixed; background: #222; border-radius: 18px; padding: 8px; width: 200px; display: none; z-index: 3000; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .menu-item { padding: 12px 16px; color: var(--col-text); font-size: 15px; cursor: pointer; border-radius: 12px; font-weight: 600; }
-        .menu-item:hover { background: rgba(128,128,128,0.15); }
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4cd964; }
-        input:checked + .slider:before { transform: translateX(24px); }
+        .menu-item { padding: 12px 16px; color: #fff; font-size: 15px; cursor: pointer; border-radius: 12px; font-weight: 500; }
+        .menu-item:hover { background: #333; }
 
         /* ========================================= */
         /* МОБИЛЬНАЯ АДАПТАЦИЯ                       */
         /* ========================================= */
         @media (max-width: 768px) {
-            body { 
-                padding: 15px 10px 110px 10px; 
-                overflow-y: auto; 
-            }
+            body { padding: 30px 15px 100px 15px; overflow-y: auto; }
+            .top-bar { margin-bottom: 70px; flex-wrap: wrap; height: auto; gap: 15px; justify-content: center; }
+            .greeting { font-size: 36px; transition: opacity 0.2s; width: 100%; text-align: center; }
+            .header-controls { width: 100%; justify-content: center; }
             
-            /* Разносим элементы по структуре */
-            .header-actions {
-                display: contents;
-            }
-
-            /* Всплывающий поиск снизу */
-            .search-container {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                z-index: 2600; /* Перекрывает controls */
-                background: var(--col-bg);
-                padding: 15px 20px 35px 20px;
-                box-shadow: 0 -15px 30px rgba(0,0,0,0.15);
-                display: none; 
-                align-items: center;
-                gap: 12px;
-                border-top-left-radius: 30px;
-                border-top-right-radius: 30px;
-                animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            .search-container.active {
-                display: flex;
-            }
-            .search-input {
-                padding: 15px 25px;
-            }
-            #mobile-search-close {
-                display: block;
-                background: rgba(128,128,128,0.1);
-                border: none;
-                color: var(--col-text);
-                font-size: 20px;
-                font-weight: bold;
-                cursor: pointer;
-                width: 48px;
-                height: 48px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-
-            @keyframes slideUp {
-                from { transform: translateY(100%); }
-                to { transform: translateY(0); }
-            }
-
-            .board { 
-                flex-direction: column; 
-                gap: 15px; 
-                margin-bottom: 0;
-            }
+            .search-wrapper.active { width: calc(100vw - 40px); position: absolute; top: 75px; z-index: 10; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+            .top-bar:has(.search-wrapper.active) .greeting { opacity: 0; pointer-events: none; }
             
-            .column { 
-                height: auto; 
-                min-height: unset; 
-                max-height: unset;
-                padding: 20px 15px; 
-                border-radius: 25px;
-                transition: padding 0.3s ease;
-            }
-            .column-header { 
-                font-size: 20px; 
-                cursor: pointer; 
-                margin-bottom: 0; 
-            }
+            .board { flex-direction: column; gap: 20px; }
+            .column-wrapper { width: 100%; }
+            .column-title { font-size: 22px; margin-bottom: 10px; cursor: pointer; }
+            .column { height: auto; min-height: unset; padding: 15px; }
             
             .task-list {
-                max-height: 70vh; 
-                opacity: 1;
-                margin-top: 15px;
-                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
+                max-height: 60vh; opacity: 1; padding-bottom: 10px;
+                transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             }
 
-            .column.mobile-closed {
-                padding: 15px; 
-            }
-            .column.mobile-closed .task-list {
-                max-height: 0;
-                opacity: 0;
-                margin-top: 0;
-                overflow: hidden;
-            }
-            .column.mobile-closed .column-header {
-                opacity: 0.6; 
-            }
-
-            /* Панель управления на телефоне */
-            .controls {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                background: var(--bg-color); 
-                margin: 0;
-                padding: 20px 15px 35px 15px; 
-                z-index: 1000;
-                box-shadow: 0 -15px 30px var(--bg-color); 
-                display: flex;
-                gap: 8px;
-                justify-content: space-between;
-                max-width: unset;
-                flex: unset;
-            }
-            html[data-theme="dark"] .controls {
-                box-shadow: 0 -15px 30px var(--bg-color);
-            }
-            #mobile-search-btn {
-                display: block;
-            }
-            .btn { 
-                padding: 14px 5px; 
-                font-size: 13px; 
-            }
+            .column-wrapper.mobile-closed .task-list { max-height: 0; opacity: 0; overflow: hidden; padding-bottom: 0; }
+            .column-wrapper.mobile-closed .column { padding: 0; border: none; background: transparent; }
+            .column-wrapper.mobile-closed .column-title { opacity: 0.6; }
             
             .modal-content { width: 95%; padding: 25px 20px; }
-            .card { padding: 14px 15px; font-size: 14px; }
-            .rating-wrapper { width: 85px; }
-            .card-number { width: 25px; font-size: 12px; }
-            .settings-row { padding: 12px 20px; }
-            #trash-content .settings-row { padding: 10px 20px; }
+            .card { padding: 14px 15px; }
+            
+            /* Плавающие кнопки управления внизу экрана */
+            .mobile-bottom-controls {
+                position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); 
+                padding: 15px 20px 30px 20px; z-index: 1000; display: flex; gap: 10px; justify-content: space-between;
+                box-shadow: 0 -15px 30px var(--bg-color);
+            }
+            .mobile-bottom-controls .btn-modal { padding: 14px 5px; font-size: 14px; text-align: center; background: #18181b; }
+        }
+        
+        /* Скрываем нижние кнопки на ПК, показываем верхние на ПК */
+        .mobile-bottom-controls { display: none; }
+        @media (max-width: 768px) {
+            .header-controls .icon-btn:not(#search-box) { display: none; } /* Скрыть корзину и настройки сверху */
+            .mobile-bottom-controls { display: flex; }
         }
     </style>
 </head>
@@ -359,42 +265,60 @@
 
     <div id="toast" class="toast">Успешно!</div>
 
-    <div class="header-actions">
-        <div class="search-container">
-            <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
-            <button id="mobile-search-close" onclick="closeMobileSearch()">✕</button>
-        </div>
-
-        <div class="controls">
-            <button class="btn" id="mobile-search-btn" onclick="openMobileSearch()">Поиск</button>
-            <button class="btn" onclick="openModal('edit-modal')">Добавить</button>
-            <button class="btn" onclick="openModal('trash-modal')">Корзина</button>
-            <button class="btn" onclick="openModal('settings-modal')">⚙️ Настройки</button>
+    <div class="top-bar">
+        <div class="greeting">Привет, <span id="display-name">Гость</span></div>
+        <div class="header-controls">
+            <div class="search-wrapper" id="search-box">
+                <input type="text" id="global-search" class="search-input" placeholder="Поиск по фильмам..." oninput="handleSearch()">
+                <button class="search-icon-btn" id="search-btn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+            <button class="icon-btn" onclick="openModal('edit-modal')" title="Добавить фильм">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <button class="icon-btn" onclick="openModal('trash-modal')" title="Корзина">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+            <button class="icon-btn" onclick="openModal('settings-modal')" title="Настройки">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+            </button>
         </div>
     </div>
 
+    <div class="mobile-bottom-controls">
+        <button class="btn-modal" onclick="openModal('edit-modal')">Добавить</button>
+        <button class="btn-modal" onclick="openModal('trash-modal')">Корзина</button>
+        <button class="btn-modal" onclick="openModal('settings-modal')">Настройки</button>
+    </div>
+
     <div class="board">
-        <div class="column" id="zone-watchlist"><h2 class="column-header">Просмотреть <span class="count-badge">0</span></h2><div class="task-list"></div></div>
-        <div class="column" id="zone-watched"><h2 class="column-header">Просмотрено <span class="count-badge">0</span></h2><div class="task-list"></div></div>
+        <div class="column-wrapper" id="wrap-watchlist">
+            <h2 class="column-title">Хочу посмотреть <span class="count-badge" id="count-watchlist">0</span></h2>
+            <div class="column" id="zone-watchlist"><div class="task-list"></div></div>
+        </div>
+        <div class="column-wrapper" id="wrap-watched">
+            <h2 class="column-title">Просмотрено <span class="count-badge" id="count-watched">0</span></h2>
+            <div class="column" id="zone-watched"><div class="task-list"></div></div>
+        </div>
     </div>
 
     <div class="modal-overlay" id="auth-modal" style="background-color: rgba(0, 0, 0, 0.95);">
         <div class="modal-content" style="text-align: center; max-width: 400px; padding: 40px 30px;">
             <h2 style="margin-bottom: 15px;">Синхронизация</h2>
-            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый 5-значный код.</p>
+            <p style="margin-bottom: 25px; font-size: 15px; color: var(--header-sub);">Создайте профиль или введите готовый код.</p>
 
-            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px; margin-bottom: 15px;">
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; margin-bottom: 15px; border: var(--card-border);">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Новый профиль</h4>
-                <input type="text" id="auth-name" placeholder="Ваше имя..." class="search-input" style="margin-bottom: 15px; text-align: center;">
-                <button class="btn" style="width: 100%;" onclick="createNewProfile()">Создать профиль</button>
+                <input type="text" id="auth-name" placeholder="Ваше имя..." style="width: 100%; text-align: center; margin-bottom: 15px;">
+                <button class="btn-modal btn-primary" style="width: 100%;" onclick="createNewProfile()">Создать профиль</button>
             </div>
 
-            <div style="background: rgba(128,128,128,0.1); padding: 20px; border-radius: 25px;">
+            <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 25px; border: var(--card-border);">
                 <h4 style="margin-bottom: 15px; font-size: 16px;">Уже есть код?</h4>
-                <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" class="search-input" style="margin-bottom: 15px; text-align: center; text-transform: uppercase;">
-                <button class="btn" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
+                <input type="text" id="auth-key" placeholder="Пример: 50S4L" maxlength="5" style="width: 100%; text-align: center; text-transform: uppercase; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px;">
+                <button class="btn-modal btn-primary" style="width: 100%;" onclick="loginWithKey()">Войти по коду</button>
             </div>
-            
             <div id="auth-status" style="margin-top: 20px; font-size: 14px; font-weight: bold; min-height: 20px;"></div>
         </div>
     </div>
@@ -402,22 +326,22 @@
     <div class="modal-overlay" id="info-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-bottom:15px;">Ваш код доступа</h3>
-            <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его, чтобы не потерять список фильмов!</p>
+            <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его!</p>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
-                <input type="text" id="info-code-input" readonly style="width: 120px; background: rgba(128,128,128,0.1); border: none; padding: 15px; border-radius: 15px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
-                <button class="btn" style="flex: unset; padding: 10px 20px;" onclick="copyInfoCode()">Копировать</button>
+                <input type="text" id="info-code-input" readonly style="width: 120px; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
+                <button class="btn-modal" style="flex: unset; padding: 10px 20px;" onclick="copyInfoCode()">Копировать</button>
             </div>
-            <button class="btn" style="background:#DCDCDC; width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
+            <button class="btn-modal btn-primary" style="width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="logout-modal" onclick="closeOnOverlay(event)" style="z-index: 2500;">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-bottom:15px;">Выйти из профиля?</h3>
-            <p style="margin-bottom: 25px; font-size: 14px; color: var(--header-sub);">Убедитесь, что вы записали свой код. Иначе доступ к списку будет потерян.</p>
+            <p style="margin-bottom: 25px; font-size: 14px; color: var(--header-sub);">Убедитесь, что вы записали код.</p>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('logout-modal')">Отмена</button>
-                <button class="btn" style="background:var(--danger); color:white;" onclick="confirmLogout()">Выйти</button>
+                <button class="btn-modal" onclick="closeModal('logout-modal')">Отмена</button>
+                <button class="btn-modal" style="background:var(--danger); color:white; border-color:var(--danger);" onclick="confirmLogout()">Выйти</button>
             </div>
         </div>
     </div>
@@ -425,13 +349,10 @@
     <div class="modal-overlay" id="edit-modal" onclick="closeOnOverlay(event)">
         <div class="modal-content">
             <h3 id="modal-title" style="text-align:center; margin-bottom:20px;">Добавить фильм</h3>
-            <input type="text" id="movie-input" 
-                   style="background:rgba(128,128,128,0.1); border:none; padding:15px; border-radius:15px; color:inherit; margin-bottom:20px; outline:none; user-select: text;" 
-                   placeholder="Название..."
-                   onkeydown="if(event.key === 'Enter') saveMovie()">
+            <input type="text" id="movie-input" style="margin-bottom:20px;" placeholder="Название..." onkeydown="if(event.key === 'Enter') saveMovie()">
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('edit-modal')">Отмена</button>
-                <button class="btn" onclick="saveMovie()">Сохранить</button>
+                <button class="btn-modal" onclick="closeModal('edit-modal')">Отмена</button>
+                <button class="btn-modal btn-primary" onclick="saveMovie()">Сохранить</button>
             </div>
         </div>
     </div>
@@ -441,8 +362,8 @@
             <h3 style="text-align:center; margin-bottom:20px;">Корзина</h3>
             <div id="trash-content"></div>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:#DCDCDC;" onclick="closeModal('trash-modal')">Назад</button>
-                <button class="btn btn-hold" id="clear-btn">
+                <button class="btn-modal" onclick="closeModal('trash-modal')">Назад</button>
+                <button class="btn-modal btn-hold" id="clear-btn">
                     <div class="fill" id="clear-fill"></div>
                     <span style="position: relative; z-index: 2;">Очистить всё</span>
                 </button>
@@ -454,30 +375,25 @@
         <div class="modal-content">
             <h3 style="text-align:center; margin-bottom:20px;">Настройки</h3>
             
-            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
+            <div class="settings-block">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; background: var(--card-bg); border: none; padding: 12px 15px; border-radius: 50px; color: inherit; outline: none; text-align: center; font-weight: bold; font-size: 15px; letter-spacing: 2px;">
-                    <button class="btn" style="padding: 12px 20px; flex: 0 0 auto; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
+                    <input type="text" id="settings-sync-key" readonly style="flex: 1; min-width: 0; text-align: center; font-weight: bold; letter-spacing: 2px; background: rgba(255,255,255,0.02); border: none;">
+                    <button class="btn-settings" style="flex: unset;" onclick="copySettingsKey()">Копировать</button>
                 </div>
-                <button class="btn" style="width: 100%; background-color: var(--danger); color: white;" onclick="openModal('logout-modal')">Выйти из профиля</button>
+                <button class="btn-settings" style="width: 100%; border-color: rgba(239, 68, 68, 0.2); color: var(--danger);" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
 
-            <div style="background: rgba(128,128,128,0.1); padding: 15px 25px; border-radius: 25px; margin-bottom: 15px;">
+            <div class="settings-block">
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Бекап</div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn" onclick="exportData()">Экспорт</button>
-                    <button class="btn" onclick="document.getElementById('import-input').click()">Импорт</button>
+                    <button class="btn-settings" onclick="exportData()">Экспорт</button>
+                    <button class="btn-settings" onclick="document.getElementById('import-input').click()">Импорт</button>
                 </div>
                 <input type="file" id="import-input" style="display:none" accept=".json" onchange="importData(event)">
             </div>
-
-            <div class="settings-row" style="margin-bottom:20px;">
-                <span>Темная тема</span>
-                <label class="switch"><input type="checkbox" id="theme-checkbox" onchange="toggleTheme()"><span class="slider"></span></label>
-            </div>
             
-            <button class="btn" style="background:#DCDCDC;" onclick="closeModal('settings-modal')">Закрыть</button>
+            <button class="btn-settings" style="width: 100%; margin-top: 10px;" onclick="closeModal('settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -487,8 +403,8 @@
             <div class="rating-picker" id="picker-container" style="display:flex; justify-content:center; gap:8px; margin-bottom:10px;"></div>
             <div id="rating-display" style="text-align:center; font-size:24px; font-weight:bold; margin-bottom:25px; color:var(--rating-green)">0.0</div>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background:var(--danger); color:white;" onclick="removeRating()">Убрать</button>
-                <button class="btn" onclick="saveRating()">Готово</button>
+                <button class="btn-modal" style="background:var(--danger); border-color:var(--danger); color:white;" onclick="removeRating()">Убрать</button>
+                <button class="btn-modal btn-primary" onclick="saveRating()">Готово</button>
             </div>
         </div>
     </div>
@@ -498,7 +414,7 @@
         <div class="menu-item" onclick="openRating()">Рейтинг</div>
         <div class="menu-item" onclick="moveCurrent()">Переместить</div>
         <div class="menu-item" onclick="copyCurrent()">Копировать</div>
-        <div class="menu-item" style="color:#ff4d4d" onclick="deleteCurrent()">В корзину</div>
+        <div class="menu-item" style="color:var(--danger)" onclick="deleteCurrent()">В корзину</div>
     </div>
 
     <script>
@@ -507,14 +423,7 @@
         let deletedMovies = JSON.parse(localStorage.getItem('deletedMovies')) || [];
         let holdTimer, cloudTimer, currentPickerValue = 0;
 
-        // Переменные для продвинутых Touch-событий на мобилках
-        let mobileTouchTimer = null;
-        let mobileTouchCard = null;
-        let isMobileDragging = false;
-        let startTouchX = 0;
-        let startTouchY = 0;
-
-        // --- УТИЛИТА УВЕДОМЛЕНИЙ ---
+        // Уведомления
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -522,20 +431,31 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // --- АВТОРИЗАЦИЯ И СИНХРОНИЗАЦИЯ ---
+        // Поиск в шапке (без авто-фокуса)
+        const searchBox = document.getElementById('search-box');
+        const searchInput = document.getElementById('global-search');
+        document.getElementById('search-btn').addEventListener('click', () => {
+            searchBox.classList.toggle('active');
+            if(!searchBox.classList.contains('active')) {
+                searchInput.value = ''; handleSearch(); 
+            }
+        });
+
+        // Авторизация и Синхронизация
         function generateShortCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
-            for (let i = 0; i < 5; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+            for (let i = 0; i < 5; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
             return result;
         }
 
         function showAuthStatus(msg, isError = false) {
             const el = document.getElementById('auth-status');
-            el.textContent = msg;
-            el.style.color = isError ? 'var(--danger)' : 'var(--rating-green)';
+            el.textContent = msg; el.style.color = isError ? 'var(--danger)' : 'var(--rating-green)';
+        }
+
+        function setDisplayName(name) {
+            document.getElementById('display-name').textContent = name || 'Гость';
         }
 
         async function createNewProfile() {
@@ -546,20 +466,17 @@
             const code = generateShortCode();
             localStorage.setItem('syncKey', code);
             localStorage.setItem('syncName', cleanName);
+            setDisplayName(cleanName);
             
             document.getElementById('auth-modal').classList.remove('is-open');
-            
             document.getElementById('info-code-input').value = code;
             openModal('info-modal');
-            
             refreshUI(true); 
         }
 
         function copyInfoCode() {
             const input = document.getElementById('info-code-input');
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            showToast('Код скопирован!');
+            input.select(); navigator.clipboard.writeText(input.value); showToast('Код скопирован!');
         }
 
         async function loginWithKey() {
@@ -567,7 +484,6 @@
             if (!key || key.length !== 5) return showAuthStatus('Введите корректный 5-значный код', true);
 
             showAuthStatus('Ищем профиль в облаке...');
-            
             try {
                 const res = await fetch(`/api/load?key=${key}`);
                 if (res.status === 404) return showAuthStatus('Профиль не найден. Проверьте код.', true);
@@ -575,7 +491,9 @@
                 
                 const cloudData = await res.json();
                 localStorage.setItem('syncKey', key);
-                localStorage.setItem('syncName', cloudData.userName || 'User');
+                const uName = cloudData.userName || 'User';
+                localStorage.setItem('syncName', uName);
+                setDisplayName(uName);
                 localStorage.setItem('boardData', JSON.stringify(cloudData.boardData));
                 localStorage.setItem('deletedMovies', JSON.stringify(cloudData.deletedMovies || []));
                 
@@ -590,155 +508,125 @@
             const key = localStorage.getItem('syncKey');
             const userName = localStorage.getItem('syncName') || 'User';
             if (!key) return; 
-
             try {
                 await fetch('/api/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key, userName, boardData, deletedMovies: deletedList })
                 });
-            } catch (e) { console.error('Сбой фонового сохранения в облако', e); }
+            } catch (e) { console.error('Сбой фонового сохранения', e); }
         }
 
         function copySettingsKey() {
             const key = document.getElementById('settings-sync-key').value;
-            if (key) {
-                navigator.clipboard.writeText(key);
-                showToast('Код скопирован!');
-            }
+            if (key) { navigator.clipboard.writeText(key); showToast('Код скопирован!'); }
         }
 
         function confirmLogout() {
-            localStorage.clear();
-            location.reload();
+            localStorage.clear(); location.reload();
         }
 
-        // --- УПРАВЛЕНИЕ ПОИСКОМ НА ТЕЛЕФОНЕ ---
-        function openMobileSearch() {
-            document.querySelector('.search-container').classList.add('active');
-            setTimeout(() => document.getElementById('global-search').focus(), 150);
-        }
-
-        function closeMobileSearch() {
-            document.querySelector('.search-container').classList.remove('active');
-            const input = document.getElementById('global-search');
-            input.value = '';
-            handleSearch();
-        }
-
-        // --- ИНТЕРФЕЙС И ЛОГИКА ---
+        // Интерфейс и Логика
         function createCard(title, rating = "0") {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<span class="card-number"></span><span class="card-title">${title}</span>${getStarsHTML(rating)}`;
             
-            // Настольные события
+            // ПК drag&drop
             card.addEventListener('mousedown', onDragStart);
             
-            // Умные мобильные тач-события (Зажатие > 1 сек - перетаскивание, Тап < 1 сек - меню)
-            card.addEventListener('touchstart', onTouchStart, { passive: false });
-            card.addEventListener('touchmove', onTouchMove, { passive: false });
-            card.addEventListener('touchend', onTouchEnd, { passive: false });
+            // Блокируем системное меню
+            card.addEventListener('contextmenu', e => { e.preventDefault(); });
+            
+            // Мобилки - строгое разделение перетаскивания и тапа
+            let touchTimer;
+            let isTouchDragging = false;
+            let hasMoved = false;
+            let startY, startX;
+
+            card.addEventListener('touchstart', (e) => {
+                if (window.innerWidth > 768) return;
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+                hasMoved = false;
+                isTouchDragging = false;
+                
+                touchTimer = setTimeout(() => {
+                    isTouchDragging = true;
+                    if(navigator.vibrate) navigator.vibrate(50);
+                    
+                    // Создаем плавающий аватар для мобилки (поверх маски)
+                    const rect = card.getBoundingClientRect();
+                    shiftX = e.touches[0].clientX - rect.left;
+                    shiftY = e.touches[0].clientY - rect.top;
+
+                    avatar = card.cloneNode(true);
+                    avatar.classList.add('drag-avatar');
+                    avatar.style.width = `${card.offsetWidth}px`;
+                    document.body.appendChild(avatar);
+
+                    card.classList.add('dragging'); 
+                    updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
+                }, 300);
+            }, {passive: true});
+
+            card.addEventListener('touchmove', (e) => {
+                if (window.innerWidth > 768) return;
+                
+                if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
+                    hasMoved = true;
+                }
+                
+                if (!isTouchDragging) {
+                    if (hasMoved) clearTimeout(touchTimer);
+                    return;
+                }
+                
+                e.preventDefault(); 
+                updateAvatarPos(e.touches[0].clientX, e.touches[0].clientY);
+                
+                const touch = e.touches[0];
+                const list = card.parentElement;
+                const siblings = [...list.querySelectorAll('.card:not(.dragging)')];
+                const nextSibling = siblings.find(sibling => touch.clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2);
+                
+                if (nextSibling) list.insertBefore(card, nextSibling);
+                else list.appendChild(card);
+            }, {passive: false});
+
+            card.addEventListener('touchend', (e) => {
+                if (window.innerWidth > 768) return;
+                clearTimeout(touchTimer);
+                
+                if (isTouchDragging) {
+                    if (avatar) avatar.remove();
+                    card.classList.remove('dragging');
+                    isTouchDragging = false;
+                    avatar = null;
+                    refreshUI(true);
+                } else if (!hasMoved && !e.target.closest('.rating-wrapper')) {
+                    // Короткий или долгий тап без движения -> открывает меню
+                    showContextMenu(e.changedTouches[0], card);
+                }
+            });
+
+            // ПК - контекстное меню
+            card.addEventListener('click', function(e) {
+                if (window.innerWidth > 768 && !e.target.closest('.rating-wrapper')) {
+                    showContextMenu(e, card);
+                }
+            });
 
             return card;
-        }
-
-        // --- МОБИЛЬНАЯ ОБРАБОТКА ЖЕСТОВ (ТАП И ЗАЖАТИЕ) ---
-        function onTouchStart(e) {
-            if (e.target.closest('.rating-wrapper')) return;
-            const card = e.currentTarget;
-            mobileTouchCard = card;
-            isMobileDragging = false;
-            
-            const touch = e.touches[0];
-            startTouchX = touch.clientX;
-            startTouchY = touch.clientY;
-
-            mobileTouchTimer = setTimeout(() => {
-                isMobileDragging = true;
-                dragItem = card;
-
-                if (navigator.vibrate) navigator.vibrate(50); // Легкий виброотклик о начале перетаскивания
-
-                const rect = dragItem.getBoundingClientRect();
-                shiftX = startTouchX - rect.left;
-                shiftY = startTouchY - rect.top;
-
-                avatar = dragItem.cloneNode(true);
-                avatar.classList.add('drag-avatar');
-                avatar.style.cssText = `position:fixed; pointer-events:none; z-index:9999; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px;`;
-                document.body.appendChild(avatar);
-                dragItem.classList.add('dragging');
-
-                updateAvatarPos(startTouchX, startTouchY);
-            }, 1000); // Ровно 1 секунда зажатия
-        }
-
-        function onTouchMove(e) {
-            if (!mobileTouchCard) return;
-            const touch = e.touches[0];
-
-            if (!isMobileDragging) {
-                // Если зажатие еще не сработало, но палец сильно сдвинулся — отменяем таймер зажатия (это обычный скролл страницы)
-                if (Math.abs(touch.clientX - startTouchX) > 10 || Math.abs(touch.clientY - startTouchY) > 10) {
-                    clearTimeout(mobileTouchTimer);
-                }
-                return;
-            }
-
-            // Если карточка тащится — блокируем нативный скролл
-            e.preventDefault();
-            updateAvatarPos(touch.clientX, touch.clientY);
-
-            avatar.style.display = 'none';
-            const el = document.elementFromPoint(touch.clientX, touch.clientY);
-            avatar.style.display = 'flex';
-
-            const list = el?.closest('.task-list');
-            if (list) {
-                const draggables = [...list.querySelectorAll('.card:not(.dragging)')];
-                const after = draggables.reduce((closest, child) => {
-                    const box = child.getBoundingClientRect();
-                    const offset = touch.clientY - box.top - box.height / 2;
-                    return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
-                }, { offset: Number.NEGATIVE_INFINITY }).element;
-
-                after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
-                refreshUI(true);
-            }
-        }
-
-        function onTouchEnd(e) {
-            clearTimeout(mobileTouchTimer);
-
-            if (isMobileDragging) {
-                e.preventDefault();
-                if (avatar) avatar.remove();
-                if (dragItem) dragItem.classList.remove('dragging');
-                avatar = dragItem = null;
-                refreshUI(true);
-            } else {
-                // Обычный короткий клик (Меньше секунды без движения) -> вызываем меню
-                const touch = e.changedTouches[0];
-                if (Math.abs(touch.clientX - startTouchX) < 10 && Math.abs(touch.clientY - startTouchY) < 10) {
-                    e.preventDefault();
-                    const pseudoEvent = {
-                        preventDefault: () => {},
-                        clientX: touch.clientX,
-                        clientY: touch.clientY
-                    };
-                    showContextMenu(pseudoEvent, mobileTouchCard);
-                }
-            }
-            mobileTouchCard = null;
-            isMobileDragging = false;
         }
 
         function saveMovie() {
             const val = document.getElementById('movie-input').value.trim();
             if (val) {
-                if (contextTarget) contextTarget.querySelector('.card-title').textContent = val;
-                else document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
+                if (contextTarget) {
+                    contextTarget.querySelector('.card-title').textContent = val;
+                } else {
+                    document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(val, "0"));
+                }
                 closeModal('edit-modal');
                 refreshUI(true);
             }
@@ -777,13 +665,11 @@
             });
         }
 
-        // --- РЕЙТИНГ ---
+        // Рейтинг
         function initPicker() {
-            const container = document.getElementById('picker-container');
-            container.innerHTML = '';
+            const container = document.getElementById('picker-container'); container.innerHTML = '';
             for (let i = 1; i <= 5; i++) {
-                const unit = document.createElement('div');
-                unit.style.cssText = "position:relative; width:42px; height:42px; cursor:pointer;";
+                const unit = document.createElement('div'); unit.style.cssText = "position:relative; width:42px; height:42px; cursor:pointer;";
                 unit.innerHTML = `<div style="position:absolute;top:0;left:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i-0.5})" onclick="selectRating(${i-0.5})"></div>
                     <div style="position:absolute;top:0;right:0;width:50%;height:100%;z-index:5" onmouseover="previewRating(${i})" onclick="selectRating(${i})"></div>
                     <svg viewBox="0 0 32 32" style="width:100%;height:100%"><path d="${starPath}" fill="var(--rating-gray)"/></svg>`;
@@ -804,8 +690,7 @@
             document.getElementById('rating-display').textContent = val.toFixed(1);
         }
         function getStarsHTML(rating) {
-            const num = parseFloat(rating) || 0;
-            let html = '<div class="rating-wrapper">';
+            const num = parseFloat(rating) || 0; let html = '<div class="rating-wrapper">';
             for (let i = 1; i <= 5; i++) {
                 let fill = (num >= i) ? "var(--rating-green)" : (num > i - 1 ? "url(#half-star-grad)" : "var(--rating-gray)");
                 html += `<svg class="star-svg" viewBox="0 0 32 32"><path d="${starPath}" fill="${fill}"/></svg>`;
@@ -816,22 +701,25 @@
         function saveRating() { if (contextTarget) { contextTarget.querySelector('.rating-wrapper').outerHTML = getStarsHTML(currentPickerValue); refreshUI(true); } closeModal('rating-modal'); }
         function removeRating() { currentPickerValue = 0; saveRating(); }
         
-        // --- DRAG & DROP (ПК ВЕРСИЯ) ---
+        // Drag & Drop (ПК)
         function onDragStart(e) {
             if (window.innerWidth <= 768 || e.which !== 1) return;
-            
             const card = e.target.closest('.card'); if (!card) return;
             if (e.target.closest('.rating-wrapper')) return;
 
             dragItem = card; const rect = dragItem.getBoundingClientRect();
             shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
-            avatar = dragItem.cloneNode(true); avatar.classList.add('drag-avatar');
-            avatar.style.cssText = `position:fixed; pointer-events:none; z-index:9999; opacity:0.9; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:${dragItem.offsetWidth}px;`;
-            document.body.appendChild(avatar); dragItem.classList.add('dragging');
+            
+            avatar = dragItem.cloneNode(true); 
+            avatar.classList.add('drag-avatar');
+            avatar.style.width = `${dragItem.offsetWidth}px`;
+            document.body.appendChild(avatar); 
+            
+            dragItem.classList.add('dragging');
             updateAvatarPos(e.clientX, e.clientY);
             document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
         }
-        function updateAvatarPos(x, y) { avatar.style.left = (x - shiftX) + 'px'; avatar.style.top = (y - shiftY) + 'px'; }
+        function updateAvatarPos(x, y) { if(avatar) { avatar.style.left = (x - shiftX) + 'px'; avatar.style.top = (y - shiftY) + 'px'; } }
         function onMouseMove(e) {
             updateAvatarPos(e.clientX, e.clientY); avatar.style.display = 'none';
             const el = document.elementFromPoint(e.clientX, e.clientY); avatar.style.display = 'flex';
@@ -843,24 +731,21 @@
                     const offset = e.clientY - box.top - box.height / 2;
                     return (offset < 0 && offset > closest.offset) ? { offset: offset, element: child } : closest;
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
-                after == null ? list.appendChild(dragItem) : list.insertBefore(dragItem, after);
+                if (after == null) list.appendChild(dragItem);
+                else list.insertBefore(dragItem, after);
                 refreshUI(true);
             }
         }
         function onMouseUp() { if (avatar) avatar.remove(); if (dragItem) dragItem.classList.remove('dragging'); avatar = dragItem = null; document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); refreshUI(true); }
         
-        // --- УМНОЕ КОНТЕКСТНОЕ МЕНЮ ---
-        function showContextMenu(e, card) {
-            e.preventDefault(); 
+        // Умное контекстное меню
+        function showContextMenu(evtData, card) {
             contextTarget = card; 
             const menu = document.getElementById('context-menu'); 
             menu.style.display = 'block'; 
             
-            const menuWidth = 200;
-            const menuHeight = 220; 
-            
-            let safeX = e.clientX;
-            let safeY = e.clientY;
+            const menuWidth = 200; const menuHeight = 220; 
+            let safeX = evtData.clientX; let safeY = evtData.clientY;
 
             if (safeX + menuWidth > window.innerWidth) safeX = window.innerWidth - menuWidth - 10;
             if (safeY + menuHeight > window.innerHeight) safeY = window.innerHeight - menuHeight - 10;
@@ -869,19 +754,13 @@
             menu.style.top = Math.max(10, safeY) + 'px';
         }
 
-        document.addEventListener('contextmenu', e => {
-            const card = e.target.closest('.card');
-            if (card) showContextMenu(e, card);
-        });
         document.addEventListener('click', () => document.getElementById('context-menu').style.display = 'none');
         
         function moveCurrent() {
             if (!contextTarget) return;
             const currentZoneId = contextTarget.closest('.column').id;
             const targetZoneId = currentZoneId === 'zone-watchlist' ? 'zone-watched' : 'zone-watchlist';
-            
-            const targetList = document.getElementById(targetZoneId).querySelector('.task-list');
-            targetList.prepend(contextTarget); 
+            document.getElementById(targetZoneId).querySelector('.task-list').prepend(contextTarget); 
             refreshUI(true);
         }
 
@@ -889,13 +768,12 @@
         function deleteCurrent() { deletedMovies.push(contextTarget.querySelector('.card-title').textContent); contextTarget.remove(); refreshUI(true); }
         function copyCurrent() { if (contextTarget) { navigator.clipboard.writeText(contextTarget.querySelector('.card-title').textContent); showToast('Название скопировано!'); } }
         function restore(i) { const m = deletedMovies.splice(i, 1)[0]; document.getElementById('zone-watchlist').querySelector('.task-list').prepend(createCard(m, "0")); renderTrash(); refreshUI(true); }
-        function toggleTheme() { const theme = document.getElementById('theme-checkbox').checked ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }
         
         function handleSearch() {
             const q = document.getElementById('global-search').value.toLowerCase();
             document.querySelectorAll('.card').forEach(c => {
                 const title = c.querySelector('.card-title').textContent.toLowerCase();
-                c.style.opacity = (!q || title.includes(q)) ? "1" : "0.1";
+                c.style.display = (!q || title.includes(q)) ? "flex" : "none";
             });
         }
         
@@ -903,16 +781,31 @@
         clearBtn.addEventListener('mousedown', () => { clearBtn.classList.add('holding'); holdTimer = setTimeout(() => { deletedMovies = []; refreshUI(true); closeModal('trash-modal'); showToast('Корзина очищена'); }, 800); });
         clearBtn.addEventListener('mouseup', () => { clearBtn.classList.remove('holding'); clearTimeout(holdTimer); });
         
+        // --- Восстановление бекапа ---
         function exportData() { const blob = new Blob([JSON.stringify({ boardData: JSON.parse(localStorage.getItem('boardData')), deletedMovies })], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'backup.json'; a.click(); showToast('Бекап скачан'); }
-        function importData(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); localStorage.setItem('boardData', JSON.stringify(data.boardData)); localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); location.reload(); }; reader.readAsText(file); }
         
-        // --- ФУНКЦИИ РЕНДЕРА И ИНИЦИАЛИЗАЦИИ ---
+        function importData(e) { 
+            const file = e.target.files[0]; if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = async (ev) => { 
+                const data = JSON.parse(ev.target.result); 
+                localStorage.setItem('boardData', JSON.stringify(data.boardData)); 
+                localStorage.setItem('deletedMovies', JSON.stringify(data.deletedMovies)); 
+                
+                await pushToCloud(data.boardData, data.deletedMovies);
+                
+                showToast('Успешно восстановлено!');
+                setTimeout(() => location.reload(), 500); 
+            }; 
+            reader.readAsText(file); 
+        }
+        
+        // --- Рендер ---
         function loadBoardFromStorage() {
             const saved = JSON.parse(localStorage.getItem('boardData'));
             if (saved) {
                 document.getElementById('zone-watchlist').querySelector('.task-list').innerHTML = '';
                 document.getElementById('zone-watched').querySelector('.task-list').innerHTML = '';
-                
                 Object.keys(saved).forEach(z => {
                     const list = document.getElementById(z)?.querySelector('.task-list');
                     if(list) saved[z].forEach(obj => list.appendChild(createCard(obj.title, obj.rating)));
@@ -924,8 +817,9 @@
         function refreshUI(pushToCloudFlag = true) {
             const data = {};
             document.querySelectorAll('.column').forEach(col => {
+                const wrapper = col.closest('.column-wrapper');
                 const cards = col.querySelectorAll('.card:not(.dragging)');
-                col.querySelector('.count-badge').textContent = cards.length;
+                if(wrapper) wrapper.querySelector('.count-badge').textContent = cards.length;
                 cards.forEach((c, i) => c.querySelector('.card-number').textContent = i + 1);
                 data[col.id] = Array.from(cards).map(t => ({ title: t.querySelector('.card-title').textContent, rating: t.querySelector('.raw-rating')?.textContent || "0" }));
             });
@@ -941,34 +835,26 @@
 
         window.onload = async () => {
             initPicker();
-            const theme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
-            document.getElementById('theme-checkbox').checked = (theme === 'dark');
             
-            document.querySelectorAll('.column-header').forEach(header => {
+            // Мобильные аккордеоны
+            document.querySelectorAll('.column-title').forEach(header => {
                 header.addEventListener('click', function() {
                     if (window.innerWidth > 768) return; 
+                    const parentWrap = this.closest('.column-wrapper');
+                    const isAlreadyClosed = parentWrap.classList.contains('mobile-closed');
                     
-                    const parentCol = this.closest('.column');
-                    const isAlreadyClosed = parentCol.classList.contains('mobile-closed');
-                    
-                    document.querySelectorAll('.column').forEach(col => col.classList.add('mobile-closed'));
-                    
-                    if (isAlreadyClosed) {
-                        parentCol.classList.remove('mobile-closed');
-                    }
+                    document.querySelectorAll('.column-wrapper').forEach(w => w.classList.add('mobile-closed'));
+                    if (isAlreadyClosed) parentWrap.classList.remove('mobile-closed');
                 });
             });
 
-            if (window.innerWidth <= 768) {
-                document.getElementById('zone-watched').classList.add('mobile-closed');
-            }
+            if (window.innerWidth <= 768) document.getElementById('wrap-watched').classList.add('mobile-closed');
 
             const key = localStorage.getItem('syncKey');
-            if (!key) {
-                document.getElementById('auth-modal').classList.add('is-open');
-                return; 
-            }
+            const name = localStorage.getItem('syncName');
+            setDisplayName(name);
+
+            if (!key) { document.getElementById('auth-modal').classList.add('is-open'); return; }
 
             loadBoardFromStorage();
 
@@ -981,9 +867,7 @@
                     localStorage.setItem('deletedMovies', JSON.stringify(deletedMovies));
                     loadBoardFromStorage();
                 }
-            } catch (e) {
-                console.log('Работаем локально, нет сети.');
-            }
+            } catch (e) { console.log('Работаем локально, нет сети.'); }
         };
     </script>
 </body>
