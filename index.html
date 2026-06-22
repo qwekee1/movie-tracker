@@ -240,25 +240,28 @@
             }
             .icon-btn-mob:active { background: #27272a; }
 
-            /* Всплывающий поиск вбок */
+            /* Плавный поиск из кнопки (исправлено на плавное расширение абсолютного элемента) */
             .search-wrapper-mob {
-                width: 100%; height: 55px; border-radius: var(--card-radius); background: #18181b;
+                position: absolute; left: 0; top: 0; width: 100%; height: 55px; 
+                border-radius: var(--card-radius); background: #18181b;
                 border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; 
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; z-index: 2;
+                transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; z-index: 10;
             }
             .search-wrapper-mob.active {
-                position: absolute; left: 20px; top: 15px; width: calc(100% - 40px); z-index: 10;
+                width: calc(100vw - 40px); /* Расширяется на весь экран с учетом паддингов */
             }
             .search-input-mob {
                 width: 100%; height: 100%; background: transparent; border: none; 
                 padding: 0 50px 0 20px; color: var(--col-text); font-size: 16px; outline: none;
-                opacity: 0; pointer-events: none; transition: opacity 0.3s; position: absolute; left: 0; top: 0;
+                opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+                position: absolute; left: 0; top: 0;
             }
             .search-wrapper-mob.active .search-input-mob { opacity: 1; pointer-events: auto; }
             .search-icon-mob {
                 position: absolute; right: 0; top: 0; width: 100%; height: 100%;
                 background: transparent; border: none; cursor: pointer; color: var(--col-text);
-                display: flex; align-items: center; justify-content: center; z-index: 2; transition: width 0.3s;
+                display: flex; align-items: center; justify-content: center; z-index: 2; 
+                transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .search-wrapper-mob.active .search-icon-mob { width: 55px; }
             .search-wrapper-mob.active .icon-search { display: none; }
@@ -301,7 +304,7 @@
     </div>
 
     <div class="mobile-bottom-controls">
-        <div style="flex: 1; display: flex; position: static;">
+        <div style="flex: 1; position: relative; height: 55px;">
             <div class="search-wrapper-mob" id="mobile-search-box">
                 <input type="text" id="mobile-search-input" class="search-input-mob" placeholder="Поиск по фильмам..." oninput="handleSearch(this.value)">
                 <button class="search-icon-mob" onclick="toggleMobileSearch()">
@@ -357,8 +360,8 @@
             <h3 style="margin-bottom:15px;">Ваш код доступа</h3>
             <p style="margin-bottom: 20px; font-size: 14px; color: var(--header-sub);">Обязательно сохраните его!</p>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;">
-                <input type="text" id="info-code-input" readonly style="width: 215px; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
-                <button class="btn-modal" style="flex: unset; padding: 10px 30px; width: auto;" onclick="copyInfoCode()">Копировать</button>
+                <input type="text" id="info-code-input" readonly style="width: 120px; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px;">
+                <button class="btn-modal" style="flex: unset; padding: 10px 20px; width: auto;" onclick="copyInfoCode()">Копировать</button>
             </div>
             <button class="btn-modal btn-primary" style="width: 100%;" onclick="closeModal('info-modal')">Понятно</button>
         </div>
@@ -408,7 +411,7 @@
                 <div style="font-weight: 600; margin-bottom: 12px; text-align: center; color: var(--header-sub); font-size: 14px;">Код доступа</div>
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; width: 100%;">
                     <input type="text" id="settings-sync-key" readonly style="flex: 1 1 0%; min-width: 0; text-align: center; font-weight: bold; font-size: 18px; letter-spacing: 2px; color: var(--rating-green); background: rgba(255,255,255,0.05); border: var(--card-border); border-radius: 12px; padding: 15px; outline: none; -webkit-text-fill-color: var(--rating-green);">
-                    <button class="btn-settings" style="flex: 0 0 auto; width: auto; padding: 15px 30px; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
+                    <button class="btn-settings" style="flex: 0 0 auto; width: auto; padding: 15px 20px; white-space: nowrap;" onclick="copySettingsKey()">Копировать</button>
                 </div>
                 <button class="btn-settings" style="border-color: rgba(239, 68, 68, 0.2); color: var(--danger); width: 100%;" onclick="openModal('logout-modal')">Выйти из профиля</button>
             </div>
@@ -475,6 +478,7 @@
                 input.value = '';
                 handleSearch();
             }
+            // автофокуса нет по запросу
         }
 
         function handleSearch(val) {
